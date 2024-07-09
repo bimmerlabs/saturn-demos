@@ -11,7 +11,6 @@ jo_fixed		    snowy;
 // probably could be cleaned up a bit, but it works...
 static int snowspeed   = 1;
 static int frame_counter = 0;
-static int color_counter = 0;
 static int snow_frame1 = 13;
 static int snow_frame2 = 13;
 static int snow_frame3 = 13;
@@ -75,7 +74,7 @@ static int snow_3x3px[FRAMES3] = {2, 7};
 
 // cycle colors to fade snow in/out
 void    update_color(int *color, bool *color_direction, int framerate, int max, int min)	{
-    if (color_counter % framerate == 0) {
+    if (frame_counter % framerate == 0) {
        // Update the color based on direction
        if (*color_direction) { 
 		(*color)++;
@@ -106,7 +105,7 @@ void    initialize_snow(jo_palette *palette)    {
 void    draw_snow (jo_palette *palette, int scrollx) {
     snowx += jo_int2fixed(snowspeed);
     snowy -= jo_int2fixed(snowspeed);
-    slScrPosNbg0((snowx) + (scrollx / 4), snowy);
+    slScrPosNbg0((snowx) + (scrollx / 4), snowy * 1.3);
     animate_palette(palette, &snow_frame1, &snow_direction1, snow_2x2px, FRAMES1, snow_color1, 2, FRAMERATE);
     animate_palette(palette, &snow_frame2, &snow_direction2, snow_2x2_curved, FRAMES1, snow_color2, 2, 7);
     animate_palette(palette, &snow_frame3, &snow_direction3, snow_1x1px, FRAMES1, snow_color3, 1, FRAMERATE);
@@ -124,10 +123,5 @@ void    draw_snow (jo_palette *palette, int scrollx) {
     if (frame_counter % 60 == 0) {
         // Reset frame_counter to 0 after every 60 frames
         frame_counter = 0;
-    }
-    color_counter++;
-    if (color_counter % 60 == 0) {
-        // Reset frame_counter to 0 after every 60 frames
-        color_counter = 0;
     }
 }
