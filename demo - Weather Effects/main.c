@@ -45,6 +45,7 @@ jo_palette 	image_pal;
 static float 	windspeed = 5.0f;
 static int 	scrollspeed = 20;    
 static int	movement_speed = 0;
+static bool	debugtxt = false;
 
 
 void                my_draw(void)	{
@@ -93,8 +94,14 @@ void                my_draw(void)	{
 void                debug_text(void)	{
 	jo_nbg2_clear();
 	jo_nbg2_printf(2, 2,  "LET IT SNOW!");
-	jo_nbg2_printf(2, 4,  "SNOW_COLOR1: %i", snow_color1);
-	jo_nbg2_printf(2, 5,  "SNOW_COLOR2: %i", snow_color2);
+	if (debugtxt) {
+		jo_nbg2_printf(2, 4,  "SNOW_2X2PX:      %i", snow_color1);
+		jo_nbg2_printf(2, 5,  "SNOW_2X2_CURVED: %i", snow_color2);
+		jo_nbg2_printf(2, 6,  "SNOW_1X1PX:      %i", snow_color3);
+		jo_nbg2_printf(2, 7,  "SNOW_1X1_CURVED: %i", snow_color4);
+		jo_nbg2_printf(2, 8,  "SNOW_INVERT:     %i", snow_color5);
+		// jo_nbg2_printf(2, 9,  "SNOW_3X3PX:      %i", snow_color6);
+	}
 }
 
 void                my_input(void)	{
@@ -127,6 +134,15 @@ void                my_input(void)	{
 			is_cd_playing = false;
 		}
 	}
+	// debug
+	if (jo_is_pad1_key_down(JO_KEY_START))	{
+		if (!debugtxt)	{
+			debugtxt = true;
+		}
+		else	{
+			debugtxt = false;
+		}
+	}
 }
 
 // keep the snow palette separate
@@ -151,7 +167,7 @@ void                init_vdp2(void)	{
 	// SNOW
 	jo_set_tga_palette_handling(my_snow_palette_handling);
 	img.data = JO_NULL;
-	jo_tga_8bits_loader(&img, JO_ROOT_DIR, "SNOWA3.TGA", 1);
+	jo_tga_8bits_loader(&img, JO_ROOT_DIR, "SNOWA5.TGA", 1);
 	jo_vdp2_set_nbg0_8bits_image(&img, snow_pal.id, false, true);
 	initialize_snow(&snow_pal);
 	jo_free_img(&img);
