@@ -94,14 +94,14 @@ void                my_draw(void)	{
 void                debug_text(void)	{
 	jo_nbg2_clear();
 	jo_nbg2_printf(2, 2,  "LET IT SNOW!");
-	if (debugtxt) {
-		jo_nbg2_printf(2, 4,  "SNOW_2X2PX:      %i", snow_color1);
-		jo_nbg2_printf(2, 5,  "SNOW_2X2_CURVED: %i", snow_color2);
-		jo_nbg2_printf(2, 6,  "SNOW_1X1PX:      %i", snow_color3);
-		jo_nbg2_printf(2, 7,  "SNOW_1X1_CURVED: %i", snow_color4);
-		jo_nbg2_printf(2, 8,  "SNOW_INVERT:     %i", snow_color5);
-		// jo_nbg2_printf(2, 9,  "SNOW_3X3PX:      %i", snow_color6);
-	}
+	// if (debugtxt) {
+		// jo_nbg2_printf(2, 4,  "SNOW_2X2PX:      %i", snow_color1);
+		// jo_nbg2_printf(2, 5,  "SNOW_2X2_CURVED: %i", snow_color2);
+		// jo_nbg2_printf(2, 6,  "SNOW_1X1PX:      %i", snow_color3);
+		// jo_nbg2_printf(2, 7,  "SNOW_1X1_CURVED: %i", snow_color4);
+		// jo_nbg2_printf(2, 8,  "SNOW_INVERT:     %i", snow_color5);
+		// // jo_nbg2_printf(2, 9,  "SNOW_3X3PX:      %i", snow_color6);
+	// }
 }
 
 void                my_input(void)	{
@@ -162,12 +162,12 @@ void                init_vdp2(void)	{
     slColorCalc(CC_ADD | CC_2ND | JO_NBG0_SCREEN); // this is the magic line
     jo_img_8bits    img;
     jo_core_tv_off();
-    jo_enable_background_3d_plane(JO_COLOR_Black);
+    jo_enable_background_3d_plane(JO_COLOR_White);
 
 	// SNOW
 	jo_set_tga_palette_handling(my_snow_palette_handling);
 	img.data = JO_NULL;
-	jo_tga_8bits_loader(&img, JO_ROOT_DIR, "SNOWA5.TGA", 1);
+	jo_tga_8bits_loader(&img, JO_ROOT_DIR, "SNOWA6.TGA", 1);
 	jo_vdp2_set_nbg0_8bits_image(&img, snow_pal.id, false, true);
 	initialize_snow(&snow_pal);
 	jo_free_img(&img);
