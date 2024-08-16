@@ -70,7 +70,8 @@ void clamp_hue_saturation_luminance(void)
 
 void my_input(void)
 {
-// hue
+
+// hue
     if (jo_is_pad1_key_pressed(JO_KEY_A)) {
         hsl.h += 1;
         clamp_hue_saturation_luminance();
@@ -149,7 +150,7 @@ jo_palette      *my_tga_palette_handling(void)
 
 void			jo_main(void)
 {
-	jo_core_init(JO_COLOR_Black);
+	jo_core_init(JO_COLOR_Blue);
 
 	jo_set_tga_palette_handling(my_tga_palette_handling);
 	jo_sprite_add_tga("TEX", "POPPY8.TGA", 0);
