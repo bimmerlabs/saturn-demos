@@ -12,16 +12,20 @@ typedef struct {
 
 typedef struct {
     Sint32 h;
-    Uint32 s;
-    Uint32 l;
+    Sint32 s;
+    Sint32 l;
 } ObjectHSL;
+
+typedef struct {
+    Sint32 h;
+    Sint32 s;
+    Sint32 l;
+} GlobalHSL;
 
 extern Bool do_update;
 
 // Function prototypes
 void clamp_hue_saturation_luminance(ObjectHSL *hsl);
-
-// Function prototypes
-void update_colors(ObjectHSL *hsl, ObjectColor *color);
+void update_colors(ObjectHSL *hsl, GlobalHSL *hsl_increment, ObjectColor *color);
 
 #endif // TOOLS_H

@@ -32,8 +32,9 @@
 
 static jo_palette palette;
 static jo_color current_color;
-ObjectColor input_color;
+ObjectColor input_color = {0, 0, 255};  // example: blue
 ObjectHSL hsl;
+GlobalHSL hsl_increment = {0, 0, 0};
 
 void my_draw(void)
 {
@@ -52,68 +53,70 @@ void my_draw(void)
     jo_printf(1, 5, "Jo_Red   = %x", JO_COLOR_SATURN_GET_R(JO_COLOR_RGB(input_color.r, input_color.g, input_color.b)));
     jo_printf(1, 6, "Jo_Green = %x", JO_COLOR_SATURN_GET_G(JO_COLOR_RGB(input_color.r, input_color.g, input_color.b)));
     jo_printf(1, 7, "Jo_Blue  = %x", JO_COLOR_SATURN_GET_B(JO_COLOR_RGB(input_color.r, input_color.g, input_color.b)));
-    jo_printf(1, 8, "do_update: %i", do_update);
 }
 
 void my_input(void)
 {
 // hue
     if (jo_is_pad1_key_pressed(JO_KEY_A)) {
-        hsl.h += 1;
+        hsl_increment.h += 1;
         do_update = true;
     }
     else if (jo_is_pad1_key_pressed(JO_KEY_X)) {
-        hsl.h -= 1;
+        hsl_increment.h -= 1;
         do_update = true;
     }
     if (jo_is_pad1_key_down(JO_KEY_R)) {
-        hsl.h += 90;
+        hsl_increment.h += 90;
         do_update = true;
     }
     else if (jo_is_pad1_key_down(JO_KEY_L)) {
-        hsl.h -= 90;
+        hsl_increment.h -= 90;
         do_update = true;
     }	
 
 // saturation
     if (jo_is_pad1_key_pressed(JO_KEY_B)) {
-        hsl.s += 1;
+        hsl_increment.s += 1;
         do_update = true;
     }
-    else if (jo_is_pad1_key_pressed(JO_KEY_Y) && hsl.s > 0) {
-        hsl.s -= 1;
+    else if (jo_is_pad1_key_pressed(JO_KEY_Y)) {
+        hsl_increment.s -= 1;
         do_update = true;
     }
     if (jo_is_pad1_key_pressed(JO_KEY_UP)) {
-        hsl.s += 5;
+        hsl_increment.s += 5;
         do_update = true;
     }
-    else if (jo_is_pad1_key_pressed(JO_KEY_DOWN) && hsl.s > 0) {
-        hsl.s -= 5;
+    else if (jo_is_pad1_key_pressed(JO_KEY_DOWN)) {
+        hsl_increment.s -= 5;
         do_update = true;
     }	
 
 // luminance
     if (jo_is_pad1_key_pressed(JO_KEY_C)) {
-        hsl.l += 1;
+        hsl_increment.l += 1;
         do_update = true;
     }
-    else if (jo_is_pad1_key_pressed(JO_KEY_Z) && hsl.l > 0) {
-        hsl.l -= 1;
+    else if (jo_is_pad1_key_pressed(JO_KEY_Z)) {
+        hsl_increment.l -= 1;
         do_update = true;
     }
     if (jo_is_pad1_key_pressed(JO_KEY_RIGHT)) {
-        hsl.l += 5;
+        hsl_increment.l += 5;
         do_update = true;
     }
-    else if (jo_is_pad1_key_pressed(JO_KEY_LEFT) && hsl.l > 0) {
-        hsl.l -= 5;
+    else if (jo_is_pad1_key_pressed(JO_KEY_LEFT)) {
+        hsl_increment.l -= 5;
         do_update = true;
     }
     
-    // update RGB
+// update RGB
     if (do_update) {
-	update_colors(&hsl, &input_color);
+	update_colors(&hsl, &hsl_increment, &input_color);
+	hsl_increment.h = 0;
+	hsl_increment.s = 0;
+	hsl_increment.l = 0;
     }
 
 // reset
@@ -140,9 +143,6 @@ void			jo_main(void)
 	jo_sprite_set_palette(palette.id);
 	
 	// initialize HSL
-	input_color.r = 0;
-        input_color.g = 0;
-        input_color.b = 255;
 	ColorHelpers_RGBToHSL(&input_color, &hsl);
 	
 	jo_core_add_callback(my_input);
