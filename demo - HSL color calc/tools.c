@@ -1,16 +1,7 @@
 #include <jo/jo.h>
+#include "ColorHelpers.h"
 
-typedef struct {
-    Uint8 r;
-    Uint8 g;
-    Uint8 b;
-} ObjectColor;
-
-typedef struct {
-    Sint32 h;
-    Uint32 s;
-    Uint32 l;
-} ObjectHSL;
+Bool do_update = false;
 
 void clamp_hue_saturation_luminance(ObjectHSL *hsl)
 {
@@ -25,4 +16,10 @@ void clamp_hue_saturation_luminance(ObjectHSL *hsl)
 
     if (hsl->l > 255)
         hsl->l = 255;
+}
+
+void update_colors(ObjectHSL *hsl, ObjectColor *color) {
+        clamp_hue_saturation_luminance(hsl);
+	ColorHelpers_HSLToRGB(hsl, color);
+	do_update = false;
 }

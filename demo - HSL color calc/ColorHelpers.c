@@ -5,19 +5,19 @@
 // Decompiled by: Rubberduckycooly & RMGRich
 // Modified for Saturn by: Hassmaschine
 // ---------------------------------------------------------------------
-#include "tools.h"
+#include "ColorHelpers.h"
 
 #define COLOR_MIN(a, b)                      ((a) < (b) ? (a) : (b))
 #define COLOR_MAX(a, b)                      ((a) > (b) ? (a) : (b))
 
-Uint16 ColorHelpers_PackRGB(ObjectColor color)
+Uint16 ColorHelpers_PackRGB(ObjectColor *color)
 {
-    return (color.b >> 3) | ((color.g >> 2) << 5) | ((color.r >> 3) << 11);
+    return (color->b >> 3) | ((color->g >> 2) << 5) | ((color->r >> 3) << 11);
 }
 
-void ColorHelpers_RGBToHSL(ObjectColor color, ObjectHSL *hsl)
+void ColorHelpers_RGBToHSL(ObjectColor *color, ObjectHSL *hsl)
 {
-    if (!color.r && !color.g && !color.b) {
+    if (!color->r && !color->g && !color->b) {
         if (hsl) {
             hsl->h = 0;
             hsl->s = 0;
@@ -26,8 +26,8 @@ void ColorHelpers_RGBToHSL(ObjectColor color, ObjectHSL *hsl)
         return;
     }
 
-    Uint8 min = COLOR_MIN(COLOR_MIN(color.r, color.g), color.b);
-    Uint8 max = COLOR_MAX(COLOR_MAX(color.r, color.g), color.b);
+    Uint8 min = COLOR_MIN(COLOR_MIN(color->r, color->g), color->b);
+    Uint8 max = COLOR_MAX(COLOR_MAX(color->r, color->g), color->b);
 
     Sint32 chroma = max - min;
     if (max) {
@@ -41,12 +41,12 @@ void ColorHelpers_RGBToHSL(ObjectColor color, ObjectHSL *hsl)
             if (hsl) {
                 Sint32 h = 0;
 
-                if (color.r == max)
-                    h = 60 * (Sint32)(color.g - color.b) / chroma;
-                else if (color.g == max)
-                    h = 60 * (Sint32)(color.b - color.r) / chroma + 120;
+                if (color->r == max)
+                    h = 60 * (Sint32)(color->g - color->b) / chroma;
+                else if (color->g == max)
+                    h = 60 * (Sint32)(color->b - color->r) / chroma + 120;
                 else
-                    h = 60 * (Sint32)(color.r - color.g) / chroma + 240;
+                    h = 60 * (Sint32)(color->r - color->g) / chroma + 240;
 
                 if (h < 0)
                     h += 360;
@@ -60,59 +60,59 @@ void ColorHelpers_RGBToHSL(ObjectColor color, ObjectHSL *hsl)
 }
 
 
-void ColorHelpers_HSLToRGB(ObjectHSL hsl, ObjectColor *color)
+void ColorHelpers_HSLToRGB(ObjectHSL *hsl, ObjectColor *color)
 {
     Uint32 green = 0, red = 0, blue = 0;
 
-    if (hsl.s) {
-        Sint32 s = hsl.l * hsl.s / 255;
+    if (hsl->s) {
+        Sint32 s = hsl->l * hsl->s / 255;
 
-        Sint32 p = hsl.l - s;
-        Sint32 q = hsl.l - (s * (hsl.h % 60)) / 60;
-        Sint32 t = hsl.l - (s * (60 - hsl.h % 60)) / 60;
+        Sint32 p = hsl->l - s;
+        Sint32 q = hsl->l - (s * (hsl->h % 60)) / 60;
+        Sint32 t = hsl->l - (s * (60 - hsl->h % 60)) / 60;
 
-        switch (hsl.h / 60) {
+        switch (hsl->h / 60) {
             case 0:
-                red   = hsl.l;
+                red   = hsl->l;
                 green = t;
                 blue  = p;
                 break;
 
             case 1:
                 red   = q;
-                green = hsl.l;
+                green = hsl->l;
                 blue  = p;
                 break;
 
             case 2:
                 red   = p;
-                green = hsl.l;
+                green = hsl->l;
                 blue  = t;
                 break;
 
             case 3:
                 red   = p;
                 green = q;
-                blue  = hsl.l;
+                blue  = hsl->l;
                 break;
 
             case 4:
                 red   = t;
                 green = p;
-                blue  = hsl.l;
+                blue  = hsl->l;
                 break;
 
             case 5:
             default:
-                red   = hsl.l;
+                red   = hsl->l;
                 green = p;
                 blue  = q;
                 break;
         }
     } else {
-        red   = hsl.l;
-        green = hsl.l;
-        blue  = hsl.l;
+        red   = hsl->l;
+        green = hsl->l;
+        blue  = hsl->l;
     }
 
     if (color) {
