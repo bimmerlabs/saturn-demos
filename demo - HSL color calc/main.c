@@ -27,6 +27,7 @@
 */
 
 #include <jo/jo.h>
+#include "tools.h"
 #include "ColorHelpers.h"
 
 static jo_palette palette;
@@ -53,86 +54,71 @@ void my_draw(void)
     jo_printf(1, 7, "Jo_Blue  = %x", JO_COLOR_SATURN_GET_B(JO_COLOR_RGB(input_color.r, input_color.g, input_color.b)));
 }
 
-void clamp_hue_saturation_luminance(void)
-{
-    if (hsl.h >= 360)
-        hsl.h = 0;
-        
-    if (hsl.h < 0)
-        hsl.h = 360 + hsl.h;
-
-    if (hsl.s > 255)
-        hsl.s = 255;
-
-    if (hsl.l > 255)
-        hsl.l = 255;
-}
-
 void my_input(void)
 {
 // hue
     if (jo_is_pad1_key_pressed(JO_KEY_A)) {
         hsl.h += 1;
-        clamp_hue_saturation_luminance();
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
     else if (jo_is_pad1_key_pressed(JO_KEY_X)) {
         hsl.h -= 1;
-        clamp_hue_saturation_luminance();
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
     if (jo_is_pad1_key_down(JO_KEY_R)) {
-        hsl.h += 10;
-        clamp_hue_saturation_luminance();
+        hsl.h += 90;
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
     else if (jo_is_pad1_key_down(JO_KEY_L)) {
-        hsl.h -= 10;
-        clamp_hue_saturation_luminance();
+        hsl.h -= 90;
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }	
 
 // saturation
     if (jo_is_pad1_key_pressed(JO_KEY_B)) {
         hsl.s += 1;
-        clamp_hue_saturation_luminance();
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
     else if (jo_is_pad1_key_pressed(JO_KEY_Y) && hsl.s > 0) {
         hsl.s -= 1;
-        clamp_hue_saturation_luminance();
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
     if (jo_is_pad1_key_pressed(JO_KEY_UP)) {
         hsl.s += 5;
-        clamp_hue_saturation_luminance();
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
     else if (jo_is_pad1_key_pressed(JO_KEY_DOWN) && hsl.s > 0) {
         hsl.s -= 5;
-        clamp_hue_saturation_luminance();
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }	
 
 // luminance
     if (jo_is_pad1_key_pressed(JO_KEY_C)) {
         hsl.l += 1;
-        clamp_hue_saturation_luminance();
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
     else if (jo_is_pad1_key_pressed(JO_KEY_Z) && hsl.l > 0) {
         hsl.l -= 1;
-        clamp_hue_saturation_luminance();
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
     if (jo_is_pad1_key_pressed(JO_KEY_RIGHT)) {
         hsl.l += 5;
-        clamp_hue_saturation_luminance();
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
     else if (jo_is_pad1_key_pressed(JO_KEY_LEFT) && hsl.l > 0) {
         hsl.l -= 5;
-        clamp_hue_saturation_luminance();
+        clamp_hue_saturation_luminance(&hsl);
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
 

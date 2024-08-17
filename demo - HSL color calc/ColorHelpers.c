@@ -5,28 +5,12 @@
 // Decompiled by: Rubberduckycooly & RMGRich
 // Modified for Saturn by: Hassmaschine
 // ---------------------------------------------------------------------
+#include "tools.h"
 
 #define COLOR_MIN(a, b)                      ((a) < (b) ? (a) : (b))
 #define COLOR_MAX(a, b)                      ((a) > (b) ? (a) : (b))
 
-typedef unsigned char uint8;
-typedef unsigned short uint16;
-typedef unsigned int uint32;
-typedef signed int int32;
-
-typedef struct {
-    uint8 r;
-    uint8 g;
-    uint8 b;
-} ObjectColor;
-
-typedef struct {
-    int32 h; // Hue
-    uint32 s; // Saturation
-    uint32 l; // Luminance
-} ObjectHSL;
-
-uint16 ColorHelpers_PackRGB(ObjectColor color)
+Uint16 ColorHelpers_PackRGB(ObjectColor color)
 {
     return (color.b >> 3) | ((color.g >> 2) << 5) | ((color.r >> 3) << 11);
 }
@@ -42,10 +26,10 @@ void ColorHelpers_RGBToHSL(ObjectColor color, ObjectHSL *hsl)
         return;
     }
 
-    uint8 min = COLOR_MIN(COLOR_MIN(color.r, color.g), color.b);
-    uint8 max = COLOR_MAX(COLOR_MAX(color.r, color.g), color.b);
+    Uint8 min = COLOR_MIN(COLOR_MIN(color.r, color.g), color.b);
+    Uint8 max = COLOR_MAX(COLOR_MAX(color.r, color.g), color.b);
 
-    int32 chroma = max - min;
+    Sint32 chroma = max - min;
     if (max) {
         if (max == min) {
             if (hsl) {
@@ -55,14 +39,14 @@ void ColorHelpers_RGBToHSL(ObjectColor color, ObjectHSL *hsl)
             }
         } else {
             if (hsl) {
-                int32 h = 0;
+                Sint32 h = 0;
 
                 if (color.r == max)
-                    h = 60 * (int32)(color.g - color.b) / chroma;
+                    h = 60 * (Sint32)(color.g - color.b) / chroma;
                 else if (color.g == max)
-                    h = 60 * (int32)(color.b - color.r) / chroma + 120;
+                    h = 60 * (Sint32)(color.b - color.r) / chroma + 120;
                 else
-                    h = 60 * (int32)(color.r - color.g) / chroma + 240;
+                    h = 60 * (Sint32)(color.r - color.g) / chroma + 240;
 
                 if (h < 0)
                     h += 360;
@@ -78,14 +62,14 @@ void ColorHelpers_RGBToHSL(ObjectColor color, ObjectHSL *hsl)
 
 void ColorHelpers_HSLToRGB(ObjectHSL hsl, ObjectColor *color)
 {
-    uint32 green = 0, red = 0, blue = 0;
+    Uint32 green = 0, red = 0, blue = 0;
 
     if (hsl.s) {
-        int32 s = hsl.l * hsl.s / 255;
+        Sint32 s = hsl.l * hsl.s / 255;
 
-        int32 p = hsl.l - s;
-        int32 q = hsl.l - (s * (hsl.h % 60)) / 60;
-        int32 t = hsl.l - (s * (60 - hsl.h % 60)) / 60;
+        Sint32 p = hsl.l - s;
+        Sint32 q = hsl.l - (s * (hsl.h % 60)) / 60;
+        Sint32 t = hsl.l - (s * (60 - hsl.h % 60)) / 60;
 
         switch (hsl.h / 60) {
             case 0:
