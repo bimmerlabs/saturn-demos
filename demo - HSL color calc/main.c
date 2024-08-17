@@ -30,8 +30,7 @@
 #include "ColorHelpers.h"
 
 static jo_palette palette;
-
-// Example color (pure blue)
+static jo_color current_color;
 ObjectColor input_color;
 ObjectHSL hsl;
 
@@ -40,8 +39,9 @@ void my_draw(void)
     jo_clear_screen();
 
     // update palette index with our new RGB values
-    palette.data[4] = JO_COLOR_RGB(input_color.r, input_color.g, input_color.b);
-    jo_sprite_set_palette(palette.id);
+    current_color = JO_COLOR_RGB(input_color.r, input_color.g, input_color.b);
+    // jo_set_default_background_color(current_color); // uncomment to change BG color
+    palette.data[4] = current_color;
     jo_sprite_draw3D(0, 0, 0, 500);
     
     // Print result
@@ -70,8 +70,7 @@ void clamp_hue_saturation_luminance(void)
 
 void my_input(void)
 {
-
-// hue
+// hue
     if (jo_is_pad1_key_pressed(JO_KEY_A)) {
         hsl.h += 1;
         clamp_hue_saturation_luminance();
@@ -104,12 +103,14 @@ void my_input(void)
         clamp_hue_saturation_luminance();
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
-    if (jo_is_pad1_key_down(JO_KEY_UP)) {
-        hsl.s = 255;
+    if (jo_is_pad1_key_pressed(JO_KEY_UP)) {
+        hsl.s += 5;
+        clamp_hue_saturation_luminance();
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
-    else if (jo_is_pad1_key_down(JO_KEY_DOWN) && hsl.s > 0) {
-        hsl.s = 0;
+    else if (jo_is_pad1_key_pressed(JO_KEY_DOWN) && hsl.s > 0) {
+        hsl.s -= 5;
+        clamp_hue_saturation_luminance();
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }	
 
@@ -124,12 +125,14 @@ void my_input(void)
         clamp_hue_saturation_luminance();
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
-    if (jo_is_pad1_key_down(JO_KEY_RIGHT)) {
-        hsl.l = 255;
+    if (jo_is_pad1_key_pressed(JO_KEY_RIGHT)) {
+        hsl.l += 5;
+        clamp_hue_saturation_luminance();
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
-    else if (jo_is_pad1_key_down(JO_KEY_LEFT) && hsl.l > 0) {
-        hsl.l = 0;
+    else if (jo_is_pad1_key_pressed(JO_KEY_LEFT) && hsl.l > 0) {
+        hsl.l -= 5;
+        clamp_hue_saturation_luminance();
 	ColorHelpers_HSLToRGB(hsl, &input_color);
     }
 
@@ -153,7 +156,9 @@ void			jo_main(void)
 	jo_core_init(JO_COLOR_Blue);
 
 	jo_set_tga_palette_handling(my_tga_palette_handling);
-	jo_sprite_add_tga("TEX", "POPPY8.TGA", 0);
+	jo_sprite_add_tga("TEX", "POPPY8.TGA", 0); // use 5 for transparent poppy background color
+	jo_sprite_set_palette(palette.id);
+	
 	// initialize HSL
 	input_color.r = 0;
         input_color.g = 0;
