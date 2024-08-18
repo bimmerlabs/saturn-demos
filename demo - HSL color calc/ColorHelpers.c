@@ -7,6 +7,7 @@
 // ---------------------------------------------------------------------
 #include "ColorHelpers.h"
 
+// can probably use the ones in SGL instead
 #define COLOR_MIN(a, b)                      ((a) < (b) ? (a) : (b))
 #define COLOR_MAX(a, b)                      ((a) > (b) ? (a) : (b))
 
@@ -29,7 +30,7 @@ void ColorHelpers_RGBToHSL(ObjectColor *color, ObjectHSL *hsl)
     Uint8 min = COLOR_MIN(COLOR_MIN(color->r, color->g), color->b);
     Uint8 max = COLOR_MAX(COLOR_MAX(color->r, color->g), color->b);
 
-    Sint32 chroma = max - min;
+    Sint16 chroma = max - min;
     if (max) {
         if (max == min) {
             if (hsl) {
@@ -39,14 +40,14 @@ void ColorHelpers_RGBToHSL(ObjectColor *color, ObjectHSL *hsl)
             }
         } else {
             if (hsl) {
-                Sint32 h = 0;
+                Sint16 h = 0;
 
                 if (color->r == max)
-                    h = 60 * (Sint32)(color->g - color->b) / chroma;
+                    h = 60 * (Sint16)(color->g - color->b) / chroma;
                 else if (color->g == max)
-                    h = 60 * (Sint32)(color->b - color->r) / chroma + 120;
+                    h = 60 * (Sint16)(color->b - color->r) / chroma + 120;
                 else
-                    h = 60 * (Sint32)(color->r - color->g) / chroma + 240;
+                    h = 60 * (Sint16)(color->r - color->g) / chroma + 240;
 
                 if (h < 0)
                     h += 360;
@@ -65,11 +66,11 @@ void ColorHelpers_HSLToRGB(ObjectHSL *hsl, ObjectColor *color)
     Uint32 green = 0, red = 0, blue = 0;
 
     if (hsl->s) {
-        Sint32 s = hsl->l * hsl->s / 255;
+        Sint16 s = hsl->l * hsl->s / 255;
 
-        Sint32 p = hsl->l - s;
-        Sint32 q = hsl->l - (s * (hsl->h % 60)) / 60;
-        Sint32 t = hsl->l - (s * (60 - hsl->h % 60)) / 60;
+        Sint16 p = hsl->l - s;
+        Sint16 q = hsl->l - (s * (hsl->h % 60)) / 60;
+        Sint16 t = hsl->l - (s * (60 - hsl->h % 60)) / 60;
 
         switch (hsl->h / 60) {
             case 0:

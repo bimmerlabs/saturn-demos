@@ -1,7 +1,7 @@
 #ifndef OBJ_COLORHELPERS_H
 #define OBJ_COLORHELPERS_H
 
-#include "tools.h"
+#include "palettetools.h"
 
 // Extra Entity Functions
 Uint16 ColorHelpers_PackRGB(ObjectColor *color);

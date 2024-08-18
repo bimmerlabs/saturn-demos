@@ -27,37 +27,34 @@
 */
 
 #include <jo/jo.h>
-#include "tools.h"
+#include "palettetools.h"
 #include "ColorHelpers.h"
+#include "bg8.h"
 
-static jo_palette palette;
-static jo_color current_color;
-ObjectColor input_color = {0, 0, 255};  // example: blue
-ObjectHSL hsl;
+static jo_palette palette1;
+static jo_palette palette2;
+static int index = 0;
 GlobalHSL hsl_increment = {0, 0, 0};
-
-void my_draw(void)
+void my_draw(void)
 {
     jo_clear_screen();
-
-    // update palette index with our new RGB values
-    current_color = JO_COLOR_RGB(input_color.r, input_color.g, input_color.b);
-    // jo_set_default_background_color(current_color); // uncomment to change BG color
-    palette.data[4] = current_color;
     jo_sprite_draw3D(0, 0, 0, 500);
     
-    // Print result
-    jo_printf(1, 1, "Color: r=%d, g=%d, b=%d", input_color.r, input_color.g, input_color.b);
-    jo_printf(1, 2, "HSL:   h=%i, s=%i, l=%i" , hsl.h, hsl.s, hsl.l);
-    jo_printf(1, 4, "Jo_Color = %i", JO_COLOR_RGB(input_color.r, input_color.g, input_color.b));
-    jo_printf(1, 5, "Jo_Red   = %x", JO_COLOR_SATURN_GET_R(JO_COLOR_RGB(input_color.r, input_color.g, input_color.b)));
-    jo_printf(1, 6, "Jo_Green = %x", JO_COLOR_SATURN_GET_G(JO_COLOR_RGB(input_color.r, input_color.g, input_color.b)));
-    jo_printf(1, 7, "Jo_Blue  = %x", JO_COLOR_SATURN_GET_B(JO_COLOR_RGB(input_color.r, input_color.g, input_color.b)));
+    jo_printf(1, 1, "Palette Index: %i", index);
+    jo_printf(1, 2, "Color: r=%d, g=%d, b=%d", rgbPal.rgb0[index].r, rgbPal.rgb0[index].g, rgbPal.rgb0[index].b);
+    jo_printf(1, 3, "HSL:   h=%i, s=%i, l=%i", hslPal.hsl0[index].h, hslPal.hsl0[index].s, hslPal.hsl0[index].l);
+    jo_printf(1, 4, "Jo_Color = %i", JO_COLOR_RGB(rgbPal.rgb0[index].r, rgbPal.rgb0[index].g, rgbPal.rgb0[index].b));
+    jo_printf(1, 5, "Jo_Red   = %x", JO_COLOR_SATURN_GET_R(JO_COLOR_RGB(rgbPal.rgb0[index].r, rgbPal.rgb0[index].g, rgbPal.rgb0[index].b)));
+    jo_printf(1, 6, "Jo_Green = %x", JO_COLOR_SATURN_GET_G(JO_COLOR_RGB(rgbPal.rgb0[index].r, rgbPal.rgb0[index].g, rgbPal.rgb0[index].b)));
+    jo_printf(1, 7, "Jo_Blue  = %x", JO_COLOR_SATURN_GET_B(JO_COLOR_RGB(rgbPal.rgb0[index].r, rgbPal.rgb0[index].g, rgbPal.rgb0[index].b)));
+    jo_printf(1, 8, "Min L Index: %i", min_lum_idx);
+    jo_printf(1, 9, "Max L Index: %i", max_lum_idx);
 }
 
 void my_input(void)
 {
-// hue
+
+// hue
     if (jo_is_pad1_key_pressed(JO_KEY_A)) {
         hsl_increment.h += 1;
         do_update = true;
@@ -66,13 +63,15 @@ void my_input(void)
         hsl_increment.h -= 1;
         do_update = true;
     }
-    if (jo_is_pad1_key_down(JO_KEY_R)) {
-        hsl_increment.h += 90;
-        do_update = true;
+    if (jo_is_pad1_key_down(JO_KEY_R) && index < 15) {
+        index++;
+        // hsl_increment.h += 90;
+        // do_update = true;
     }
-    else if (jo_is_pad1_key_down(JO_KEY_L)) {
-        hsl_increment.h -= 90;
-        do_update = true;
+    else if (jo_is_pad1_key_down(JO_KEY_L) && index > 0) {
+        index--;
+        // hsl_increment.h -= 90;
+        // do_update = true;
     }	
 
 // saturation
@@ -113,7 +112,7 @@ void my_input(void)
     
 // update RGB
     if (do_update) {
-	update_colors(&hsl, &hsl_increment, &input_color);
+        MultiPaletteUpdate(&palette2, &rgbPal, &hslPal, &hsl_increment);
 	hsl_increment.h = 0;
 	hsl_increment.s = 0;
 	hsl_increment.l = 0;
@@ -121,29 +120,48 @@ void my_input(void)
 
 // reset
     if (jo_is_pad1_key_down(JO_KEY_START)) {
-	input_color.r = 0;
-        input_color.g = 0;
-        input_color.b = 255;
-	ColorHelpers_RGBToHSL(&input_color, &hsl);
+	reset_palette(&rgbPal, &originalPal);
+	MultiHslTorRgb(&hslPal, &rgbPal);
+	MultiPaletteUpdate(&palette2, &rgbPal, &hslPal, &hsl_increment);
     }
 }
 
-jo_palette      *my_tga_palette_handling(void)
+jo_palette      *my_sprite_palette_handling(void)
 {
-    jo_create_palette(&palette);
-    return (&palette);
+    jo_create_palette(&palette1);
+    return (&palette1);
+}
+
+jo_palette	*my_bg_palette_handling(void)
+{
+    jo_create_palette(&palette2);
+    return (&palette2);
+}
+
+void                init_graphics(void) {
+    // SPRITE
+    jo_set_tga_palette_handling(my_sprite_palette_handling);
+    jo_sprite_add_tga("TEX", "POPPY8.TGA", 5); // use 5 for transparent background color
+    jo_sprite_set_palette(palette1.id);
+
+    // BACKGROUND
+    jo_img_8bits    img;
+    jo_set_tga_palette_handling(my_bg_palette_handling);
+    img.data = JO_NULL;
+    jo_tga_8bits_loader(&img, "TEX", "BG8.TGA", 0);
+    jo_vdp2_set_nbg1_8bits_image(&img, palette2.id, false);
+    jo_free_img(&img);
+
+    // init palette array
+    MultiRgbToHsl(&hslPal, &rgbPal);
+    min_max_lum_idx(&hslPal);
 }
 
 void			jo_main(void)
 {
-	jo_core_init(JO_COLOR_Blue);
+	jo_core_init(JO_COLOR_Black);
 
-	jo_set_tga_palette_handling(my_tga_palette_handling);
-	jo_sprite_add_tga("TEX", "POPPY8.TGA", 0); // use 5 for transparent poppy background color
-	jo_sprite_set_palette(palette.id);
-	
-	// initialize HSL
-	ColorHelpers_RGBToHSL(&input_color, &hsl);
+	init_graphics();
 	
 	jo_core_add_callback(my_input);
 	jo_core_add_callback(my_draw);
