@@ -15,6 +15,16 @@ HslPalette hslPal = {
       {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0} }
 };
 
+PaletteGroupCollection p_collection = {
+    {
+        { 0,  0,  NUM_PALETTE_ENTRIES },
+        { 0, 0, 3 },
+        { 4, 4, 7 },
+        { 8, 8, 14 },
+        { 15, 15, 15 },
+    }
+};
+
 static jo_palette bg_palette;
 
 jo_palette	*my_bg_palette_handling(void)

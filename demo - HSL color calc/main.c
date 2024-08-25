@@ -32,11 +32,13 @@
 #include "background.h"
 
 static jo_palette palette1;
-static unsigned int index = 0;
 static float scroll = 0.0;
+
 static Bool by_index_group = true;
-static Uint8 palette_group = 0;
+static Uint8 group_id = 0;
+static Uint8 index = 0;
 PaletteRange range = {0, NUM_PALETTE_ENTRIES};
+
 GlobalHSL hsl_increment = {0, 0, 0};
 ImgAttributes img_attr = {0, 0, 0, 0};
 DemoOptions options = {false, true, true, false, true, false, false};
@@ -44,7 +46,7 @@ DemoOptions options = {false, true, true, false, true, false, false};
 {
     jo_clear_screen();
     // jo_sprite_draw3D(0, 0, 0, 500);
-    jo_printf(1, 1, "Palette Group: %i", palette_group);
+    jo_printf(1, 1, "Palette Group: %i", group_id);
     jo_printf(1, 2, "Palette Index: %i - %i", range.lower, range.upper);
     jo_printf(1, 3, "Color: r=%d, g=%d, b=%d", rgbPal.rgb0[index].r, rgbPal.rgb0[index].g, rgbPal.rgb0[index].b);
     jo_printf(1, 4, "HSL:   h=%i, s=%i, l=%i", hslPal.hsl0[index].h, hslPal.hsl0[index].s, hslPal.hsl0[index].l);
@@ -70,33 +72,13 @@ void my_input(void)
 // palette index / group
     if (jo_is_pad1_key_down(JO_KEY_R)) {
         if (by_index_group) {
-            palette_group++;
-            if (palette_group == 1) {
-                index = 3;
-                range.lower = 0;
-                range.upper = 3;
-            }
-            else if (palette_group == 2) {
-                index = 4;
-                range.lower = 4;
-                range.upper = 7;
-            }
-            else if (palette_group == 3) {
-                index = 8;
-                range.lower = 8;
-                range.upper = 14;
-            }
-            else if (palette_group == 4) {
-                index = 8;
-                range.lower = 15;
-                range.upper = 15;
-            }
-            else {
-                index = 0;
-                palette_group = 0;
-                range.lower = 0;
-                range.upper = NUM_PALETTE_ENTRIES;
-            }	
+            group_id++;
+            if (group_id > NUM_PALETTE_GROUPS-1) {
+                group_id = 0;
+            }           
+            range.lower = p_collection.group[group_id].lower;
+            range.upper = p_collection.group[group_id].upper;
+            index = p_collection.group[group_id].index;
             min_max_sl_id(&hslPal, &range, &img_attr);
         }
         else {
@@ -112,7 +94,7 @@ void my_input(void)
     if (jo_is_pad1_key_down(JO_KEY_L)) {
         if (by_index_group) {
             by_index_group = false;
-            palette_group = 0;
+            group_id = 0;
             range.lower = 0;
             range.upper = 0;
             min_max_sl_id(&hslPal, &range, &img_attr);
@@ -120,7 +102,7 @@ void my_input(void)
         else {
             by_index_group = true;
             index = 0;
-            palette_group = 0;
+            group_id = 0;
             range.lower = 0;
             range.upper = NUM_PALETTE_ENTRIES;
             min_max_sl_id(&hslPal, &range, &img_attr);

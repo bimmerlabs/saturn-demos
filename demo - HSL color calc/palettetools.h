@@ -28,6 +28,17 @@ typedef struct {
     Uint8 upper;
 } PaletteRange;
 
+typedef struct {
+    Uint8 index;
+    Uint8 lower;
+    Uint8 upper;
+} PaletteGroup;
+
+typedef struct
+{
+    PaletteGroup group[NUM_PALETTE_GROUPS];
+} PaletteGroupCollection;
+
 typedef struct RgbPalette
 {
     ObjectColor rgb0[NUM_PALETTE_ENTRIES+1];
