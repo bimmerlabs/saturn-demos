@@ -2,8 +2,7 @@
 #define PALETTETOOLS_H
 
 #include <jo/jo.h>
-
-# define NUM_PALETTE_ENTRIES 16
+#include "palette_config.h"
 
 // Struct definitions
 typedef struct {
@@ -24,31 +23,51 @@ typedef struct {
     Sint16 l;
 } GlobalHSL;
 
+typedef struct {
+    Uint8 lower;
+    Uint8 upper;
+} PaletteRange;
+
 typedef struct RgbPalette
 {
-    ObjectColor rgb0[NUM_PALETTE_ENTRIES];
+    ObjectColor rgb0[NUM_PALETTE_ENTRIES+1];
 } RgbPalette;
 
 typedef struct HslPalette
 {
-    ObjectHSL hsl0[NUM_PALETTE_ENTRIES];
+    ObjectHSL hsl0[NUM_PALETTE_ENTRIES+1];
 } HslPalette;
 
 extern Bool do_update;
-extern Bool l_update;
-extern Uint8 min_lum_idx;
-extern Uint8 max_lum_idx;
+
+typedef struct {
+    Uint8 min_sat_id;
+    Uint8 max_sat_id;
+    Uint8 min_lum_id;
+    Uint8 max_lum_id;
+} ImgAttributes;
+
+typedef struct {
+    Bool do_update;
+    Bool s_update;
+    Bool l_update;
+    Bool sl_clamp;
+    Bool debug_print;
+    Bool reset_palette;
+    Bool normal_map_mode;
+} DemoOptions;
+    
 
 // Function prototypes
-void clamp_hsl(ObjectHSL *hsl);
+void clamp_hue(ObjectHSL *hsl);
 void update_colors(ObjectHSL *hsl, GlobalHSL *hsl_increment, ObjectColor *color);
-void reset_palette(RgbPalette *dest, const RgbPalette *src);
+void reset_palette(RgbPalette *dest, const RgbPalette *src, PaletteRange *range);  // might not be needed
 void SinglePaletteUpdate(int index, ObjectColor color, jo_palette palette);
 
-void MultiPaletteUpdate(jo_palette *palette, RgbPalette *rgbPal, HslPalette *hslPal, GlobalHSL *hsl_increment);
-void MultiRgbToHsl(HslPalette *hslPal, RgbPalette *rgbPal);
-void MultiHslTorRgb(HslPalette *hslPal, RgbPalette *rgbPal);
+void MultiPaletteUpdate(jo_palette *palette, RgbPalette *rgbPal, HslPalette *hslPal, GlobalHSL *hsl_increment, PaletteRange *range);
+void MultiRgbToHsl(HslPalette *hslPal, RgbPalette *rgbPal, PaletteRange *range);
+void MultiHslTorRgb(HslPalette *hslPal, RgbPalette *rgbPal, PaletteRange *range);
 
-void min_max_lum_idx(HslPalette *hslPal);
+void min_max_sl_id(HslPalette *hslPal, PaletteRange *range, ImgAttributes *img_attr);
 
 #endif // PALETTETOOLS_H

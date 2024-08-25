@@ -60,60 +60,63 @@ void ColorHelpers_RGBToHSL(ObjectColor *color, ObjectHSL *hsl)
     }
 }
 
-
 void ColorHelpers_HSLToRGB(ObjectHSL *hsl, ObjectColor *color)
 {
     Uint32 green = 0, red = 0, blue = 0;
 
-    if (hsl->s) {
-        Sint16 s = hsl->l * hsl->s / 255;
+    // Clamp saturation and luminance to the 0-255 range for calculation - 8/24/2024
+    Sint16 s_clamped = hsl->s < 0 ? 0 : (hsl->s > 255 ? 255 : hsl->s);
+    Sint16 l_clamped = hsl->l < 0 ? 0 : (hsl->l > 255 ? 255 : hsl->l);
 
-        Sint16 p = hsl->l - s;
-        Sint16 q = hsl->l - (s * (hsl->h % 60)) / 60;
-        Sint16 t = hsl->l - (s * (60 - hsl->h % 60)) / 60;
+    if (s_clamped) {
+        Sint16 s = l_clamped * s_clamped / 255;
+
+        Sint16 p = l_clamped - s;
+        Sint16 q = l_clamped - (s * (hsl->h % 60)) / 60;
+        Sint16 t = l_clamped - (s * (60 - hsl->h % 60)) / 60;
 
         switch (hsl->h / 60) {
             case 0:
-                red   = hsl->l;
+                red   = l_clamped;
                 green = t;
                 blue  = p;
                 break;
 
             case 1:
                 red   = q;
-                green = hsl->l;
+                green = l_clamped;
                 blue  = p;
                 break;
 
             case 2:
                 red   = p;
-                green = hsl->l;
+                green = l_clamped;
                 blue  = t;
                 break;
 
             case 3:
                 red   = p;
                 green = q;
-                blue  = hsl->l;
+                blue  = l_clamped;
                 break;
 
             case 4:
                 red   = t;
                 green = p;
-                blue  = hsl->l;
+                blue  = l_clamped;
                 break;
 
             case 5:
             default:
-                red   = hsl->l;
+                red   = l_clamped;
                 green = p;
                 blue  = q;
                 break;
         }
     } else {
-        red   = hsl->l;
-        green = hsl->l;
-        blue  = hsl->l;
+        red   = l_clamped;
+        green = l_clamped;
+        blue  = l_clamped;
     }
 
     if (color) {
