@@ -11,4 +11,4 @@ Based on an HSL color model I found in the Sonic Mania decompilation, modified f
 
 https://github.com/RSDKModding/Sonic-Mania-Decompilation
 
-![image](https://github.com/user-attachments/assets/dd9d320d-1fc2-4663-ab36-07a194e4af45)
+![image](https://github.com/user-attachments/assets/50df1d69-58dd-4aa7-9602-765deac8e36e)
