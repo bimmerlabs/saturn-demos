@@ -3,7 +3,8 @@ use strict;
 use warnings;
 
 # this pre-sorts the palette by the blue channel, which can then be sorted by hand from there.
-# input is JASC-PAL (256 colors) .pal file
+# input is JASC-PAL (256 colors) .pal file
+
 # Initialize arrays to store RGB values and "255 255 255" values separately 
 # because we assume the 256th color will be transparent if it is white
 my $table = [];
