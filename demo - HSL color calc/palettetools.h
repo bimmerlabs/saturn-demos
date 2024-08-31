@@ -24,6 +24,12 @@ typedef struct {
 } GlobalHSL;
 
 typedef struct {
+    Uint8 x;
+    Uint8 y;
+    Uint8 z;
+} LightSource;
+
+typedef struct {
     Uint8 lower;
     Uint8 upper;
 } PaletteRange;
@@ -58,15 +64,15 @@ typedef struct {
     Uint8 max_lum_id;
 } ImgAttributes;
 
-typedef struct {
-    Bool do_update;
-    Bool s_update;
-    Bool l_update;
-    Bool sl_clamp;
-    Bool debug_print;
-    Bool reset_palette;
-    Bool normal_map_mode;
-} DemoOptions;
+// typedef struct {
+    // Bool do_update;
+    // Bool s_update;
+    // Bool l_update;
+    // Bool sl_clamp;
+    // Bool debug_print;
+    // Bool reset_palette;
+    // Bool normal_map_mode;
+// } DemoOptions;
     
 
 // Function prototypes
@@ -80,5 +86,9 @@ void MultiRgbToHsl(HslPalette *hslPal, RgbPalette *rgbPal, PaletteRange *range);
 void MultiHslTorRgb(HslPalette *hslPal, RgbPalette *rgbPal, PaletteRange *range);
 
 void min_max_sl_id(HslPalette *hslPal, PaletteRange *range, ImgAttributes *img_attr);
+
+void InitNormalImage(HslPalette *hslPal, PaletteRange *range, ImageConfig *image);
+void MultiLuminanceSet(HslPalette *hslPal, PaletteRange *range, ImageConfig *image);
+void normal_lighting(HslPalette *hslPal, RgbPalette *rgbPal, LightSource *light, PaletteRange *range, ImageConfig *image);
 
 #endif // PALETTETOOLS_H
