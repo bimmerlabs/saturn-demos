@@ -12,3 +12,5 @@ Based on an HSL color model I found in the [Sonic Mania decompilation](https://g
 
 Also the basis for the normal mapping demo:
 ![image](https://github.com/user-attachments/assets/7fb5df3e-3f58-48a4-9fc8-f2db14edb001)
+![image](https://github.com/user-attachments/assets/949d29a4-e2a4-4e80-ad79-bc8bcd34170b)
+![image](https://github.com/user-attachments/assets/71afd8f3-bdc7-4d8d-9b32-ff766d66e617)
