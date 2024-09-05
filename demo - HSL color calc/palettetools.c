@@ -32,10 +32,11 @@ void SinglePaletteUpdate(int index, ObjectColor color, jo_palette palette)
     palette.data[index] = JO_COLOR_RGB(color.r, color.g, color.b);
 }
 
-void MultiPaletteUpdate(jo_palette *palette, RgbPalette *rgbPal, HslPalette *hslPal, GlobalHSL *hsl_increment, PaletteRange *range) {
+void MultiPaletteUpdate(jo_palette *palette, HslPalette *hslPal, GlobalHSL *hsl_increment, PaletteRange *range) {
     for (int i = range->lower; i <= range->upper; i++) {
-        update_colors(&hslPal->hsl0[i], hsl_increment, &rgbPal->rgb0[i]);
-        palette->data[i]  = JO_COLOR_RGB(rgbPal->rgb0[i].r,  rgbPal->rgb0[i].g,  rgbPal->rgb0[i].b);
+        ObjectColor color;
+        update_colors(&hslPal->hsl0[i], hsl_increment, &color);
+        palette->data[i]  = JO_COLOR_RGB(color.r,  color.g,  color.b);
     }
 }
 

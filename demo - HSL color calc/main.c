@@ -44,18 +44,21 @@ PaletteRange range = {0, NUM_PALETTE_ENTRIES};
 
 GlobalHSL hsl_increment = {0, 0, 0};
 ImgAttributes img_attr = {0, 0, 0, 0};
-// DemoOptions options = {false, true, true, false, true, false, false};
 
 LightSource light = {186, 87, 255};
 void my_draw(void)
 {    
-    jo_clear_screen();    if (normal_map_mode) {
+    jo_clear_screen();
+    
+    ObjectColor rgb_color;
+    ColorHelpers_HSLToRGB(&hslPal.hsl0[index], &rgb_color);
+        if (normal_map_mode) {
         // this isn't really correct - yet
         // the light position actually doesn't have anything to do with the lighting model
         // it's also affected by the scale of the image
         jo_sprite_draw3D(0, 2*(light.x-127), 2*(light.y-127)-16, 500);
         jo_printf(1, 1, "NORMAL MAP DEMO");
-        jo_printf(1, 2, "Color: r=%3i, g=%3i, b=%3i", rgbPal.rgb0[index].r, rgbPal.rgb0[index].g, rgbPal.rgb0[index].b);
+        jo_printf(1, 2, "Color: r=%3i, g=%3i, b=%3i", rgb_color.r, rgb_color.g, rgb_color.b);
         jo_printf(1, 3, "HSL:   h=%3i, s=%3i, l=%3i", hslPal.hsl0[index].h, hslPal.hsl0[index].s, hslPal.hsl0[index].l);
         jo_printf(1, 4, "light: x=%3i, y=%3i, z=%3i", light.x, light.y, light.z);
     }
@@ -69,7 +72,7 @@ LightSource light = {186, 87, 255};
             jo_printf(1, 4, "Palette Index: %i / %i", range.lower+1, NUM_PALETTE_ENTRIES+1);
         jo_printf(1, 5, "min/max saturation: %3i %3i", hslPal.hsl0[img_attr.min_sat_id].s, hslPal.hsl0[img_attr.max_sat_id].s);
         jo_printf(1, 6, "min/max luminance:  %3i %3i", hslPal.hsl0[img_attr.min_lum_id].l, hslPal.hsl0[img_attr.max_lum_id].l);
-        jo_printf(1, 7, "Color: r=%3i, g=%3i, b=%3i", rgbPal.rgb0[index].r, rgbPal.rgb0[index].g, rgbPal.rgb0[index].b);
+        jo_printf(1, 7, "Color: r=%3i, g=%3i, b=%3i", rgb_color.r, rgb_color.g, rgb_color.b);
         jo_printf(1, 8, "HSL:   h=%3i, s=%3i, l=%3i", hslPal.hsl0[index].h, hslPal.hsl0[index].s, hslPal.hsl0[index].l);
     }
     if (image.scroll_rate > toFIXED(0)) {
@@ -141,12 +144,12 @@ void my_input(void)
         }
         // reset
         if (jo_is_pad1_key_down(JO_KEY_START)) {
-            MultiHslTorRgb(&hslPal, &originalPal, &range);
+            MultiHslTorRgb(&hslPal, &rgbPal, &range);
             InitNormalImage(&hslPal, &range, &image);
             light.z = 255;
-            normal_lighting(&hslPal, &originalPal, &light, &range, &image);
+            normal_lighting(&hslPal, &rgbPal, &light, &range, &image);
             min_max_sl_id(&hslPal, &range, &img_attr);
-            MultiPaletteUpdate(&bg_palette, &rgbPal, &hslPal, &hsl_increment, &range);
+            MultiPaletteUpdate(&bg_palette, &hslPal, &hsl_increment, &range);
             do_update = false;
         }
     }
@@ -235,9 +238,9 @@ void my_input(void)
         }
         // reset demo
         if (jo_is_pad1_key_down(JO_KEY_START)) {
-            MultiHslTorRgb(&hslPal, &originalPal, &range);
+            MultiHslTorRgb(&hslPal, &rgbPal, &range);
             min_max_sl_id(&hslPal, &range, &img_attr);
-            MultiPaletteUpdate(&bg_palette, &rgbPal, &hslPal, &hsl_increment, &range);
+            MultiPaletteUpdate(&bg_palette, &hslPal, &hsl_increment, &range);
             do_update = false;
         }
     }
@@ -248,10 +251,9 @@ void my_color_calc(void)
     if (do_update) {
         if (normal_map_mode) {
             MultiLuminanceSet(&hslPal, &range, &image);
-            normal_lighting(&hslPal, &originalPal, &light, &range, &image);
+            normal_lighting(&hslPal, &rgbPal, &light, &range, &image);
         }
-        MultiPaletteUpdate(&bg_palette, &rgbPal, &hslPal, &hsl_increment, &range);
-        MultiPaletteUpdate(&bg_palette, &rgbPal, &hslPal, &hsl_increment, &range);
+        MultiPaletteUpdate(&bg_palette, &hslPal, &hsl_increment, &range);
 	hsl_increment.h = 0;
 	hsl_increment.s = 0;
 	hsl_increment.l = 0;
@@ -284,17 +286,17 @@ jo_palette      *my_gradient_palette_handling(void)
 
         // normal lighting
         InitNormalImage(&hslPal, &range, &image);
-        normal_lighting(&hslPal, &originalPal, &light, &range, &image);
+        normal_lighting(&hslPal, &rgbPal, &light, &range, &image);
     }
     // set initial image colors
     min_max_sl_id(&hslPal, &range, &img_attr);
-    MultiPaletteUpdate(&bg_palette, &rgbPal, &hslPal, &hsl_increment, &range);
+    MultiPaletteUpdate(&bg_palette, &hslPal, &hsl_increment, &range);
 }
 
 void			jo_main(void)
 {
         // increase the default heap size. LWRAM is not being used
-        // jo_add_memory_zone((unsigned char *)LWRAM, LWRAM_HEAP_SIZE);
+        jo_add_memory_zone((unsigned char *)LWRAM, LWRAM_HEAP_SIZE);
         
 	jo_core_init(JO_COLOR_Black);
         jo_core_tv_off();

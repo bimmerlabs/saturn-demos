@@ -62,18 +62,7 @@ typedef struct {
     Uint8 max_sat_id;
     Uint8 min_lum_id;
     Uint8 max_lum_id;
-} ImgAttributes;
-
-// typedef struct {
-    // Bool do_update;
-    // Bool s_update;
-    // Bool l_update;
-    // Bool sl_clamp;
-    // Bool debug_print;
-    // Bool reset_palette;
-    // Bool normal_map_mode;
-// } DemoOptions;
-    
+} ImgAttributes;    
 
 // Function prototypes
 void clamp_hue(ObjectHSL *hsl);
@@ -81,7 +70,7 @@ void update_colors(ObjectHSL *hsl, GlobalHSL *hsl_increment, ObjectColor *color)
 void reset_palette(RgbPalette *dest, const RgbPalette *src, PaletteRange *range);  // might not be needed
 void SinglePaletteUpdate(int index, ObjectColor color, jo_palette palette);
 
-void MultiPaletteUpdate(jo_palette *palette, RgbPalette *rgbPal, HslPalette *hslPal, GlobalHSL *hsl_increment, PaletteRange *range);
+void MultiPaletteUpdate(jo_palette *palette, HslPalette *hslPal, GlobalHSL *hsl_increment, PaletteRange *range);
 void MultiRgbToHsl(HslPalette *hslPal, RgbPalette *rgbPal, PaletteRange *range);
 void MultiHslTorRgb(HslPalette *hslPal, RgbPalette *rgbPal, PaletteRange *range);
 
