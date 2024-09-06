@@ -34,6 +34,7 @@
 #define LWRAM 0x00200000 // start of LWRAM memory. Doesn't appear to be used
 #define LWRAM_HEAP_SIZE 0x100000 // number of bytes to extend heap by
 static jo_palette light_source;
+static Uint8 light_sprite;
 FIXED scroll = toFIXED(0.0);
 
 static Bool by_index_group = true;
@@ -44,7 +45,7 @@ PaletteRange range = {0, NUM_PALETTE_ENTRIES};
 GlobalHSL hsl_increment = {0, 0, 0};
 ImgAttributes img_attr = {0, 0, 0, 0};
 
-LightSource light = {186, 87, 255};
+LightSource light = {127, 127, 255};
 void my_draw(void)
 {    
     jo_clear_screen();
@@ -56,7 +57,7 @@ LightSource light = {186, 87, 255};
         // the light position actually doesn't have anything to do with the lighting model
         // it's also affected by the scale of the image
         // also it can be backwards (and the inputs reversed) depending on the orientation of the normal map (updated to be more 'normal' orientation)
-        jo_sprite_draw3D(0, 2*(light.x-127), -2*(light.y-127)-16, 500);
+        jo_sprite_draw3D(light_sprite, 2*(light.x-127), -2*(light.y-127), 500);
         jo_printf(1, 1, "NORMAL MAP DEMO");
         jo_printf(1, 2, "Color: r=%3i, g=%3i, b=%3i", rgb_color.r, rgb_color.g, rgb_color.b);
         jo_printf(1, 3, "HSL:   h=%3i, s=%3i, l=%3i", hslPal.hsl0[index].h, hslPal.hsl0[index].s, hslPal.hsl0[index].l);
@@ -270,7 +271,7 @@ jo_palette      *my_sprite_palette_handling(void)
     if (NORMAL_MAP_MODE) {
         // light (completely fake, it's only here for visual effect)
         jo_set_tga_palette_handling(my_sprite_palette_handling);
-        jo_sprite_add_tga("TEX", "LIGHT.TGA", 1); // use 5 for transparent background color
+        light_sprite = jo_sprite_add_tga("TEX", "LIGHT.TGA", 1); // use 5 for transparent background color
         jo_sprite_set_palette(light_source.id);
         
         jo_core_set_screens_order(JO_NBG1_SCREEN, JO_SPRITE_SCREEN);
