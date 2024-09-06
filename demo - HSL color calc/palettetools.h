@@ -45,12 +45,12 @@ typedef struct
     PaletteGroup group[NUM_PALETTE_GROUPS];
 } PaletteGroupCollection;
 
-typedef struct RgbPalette
+typedef struct
 {
     ObjectColor rgb0[NUM_PALETTE_ENTRIES+1];
 } RgbPalette;
 
-typedef struct HslPalette
+typedef struct
 {
     ObjectHSL hsl0[NUM_PALETTE_ENTRIES+1];
 } HslPalette;

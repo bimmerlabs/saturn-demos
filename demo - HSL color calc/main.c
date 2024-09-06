@@ -34,7 +34,6 @@
 #define LWRAM 0x00200000 // start of LWRAM memory. Doesn't appear to be used
 #define LWRAM_HEAP_SIZE 0x100000 // number of bytes to extend heap by
 static jo_palette light_source;
-static jo_palette gradient;
 FIXED scroll = toFIXED(0.0);
 
 static Bool by_index_group = true;
@@ -52,11 +51,12 @@ LightSource light = {186, 87, 255};
     
     ObjectColor rgb_color;
     ColorHelpers_HSLToRGB(&hslPal.hsl0[index], &rgb_color);
-        if (normal_map_mode) {
+        if (NORMAL_MAP_MODE) {
         // this isn't really correct - yet
         // the light position actually doesn't have anything to do with the lighting model
         // it's also affected by the scale of the image
-        jo_sprite_draw3D(0, 2*(light.x-127), 2*(light.y-127)-16, 500);
+        // also it can be backwards (and the inputs reversed) depending on the orientation of the normal map (updated to be more 'normal' orientation)
+        jo_sprite_draw3D(0, 2*(light.x-127), -2*(light.y-127)-16, 500);
         jo_printf(1, 1, "NORMAL MAP DEMO");
         jo_printf(1, 2, "Color: r=%3i, g=%3i, b=%3i", rgb_color.r, rgb_color.g, rgb_color.b);
         jo_printf(1, 3, "HSL:   h=%3i, s=%3i, l=%3i", hslPal.hsl0[index].h, hslPal.hsl0[index].s, hslPal.hsl0[index].l);
@@ -86,7 +86,7 @@ LightSource light = {186, 87, 255};
 
 void my_input(void)
 {
-    if (normal_map_mode) {
+    if (NORMAL_MAP_MODE) {
         // light intensity
         if (jo_is_pad1_key_pressed(JO_KEY_R) && light.z < 255) {
             light.z += 1;
@@ -117,14 +117,22 @@ void my_input(void)
         // move light
         // up / down are reversed on the coin demo because the Y axis of the normal map is upside down
         // on a normal map where the X/Y axis is starts at the lower left, this should be switched around
-        if (jo_is_pad1_key_pressed(JO_KEY_DOWN) && light.y < 255) {
+        if (jo_is_pad1_key_pressed(JO_KEY_UP) && light.y < 255) {
             light.y += 1;
             do_update = true;
         }
-        else if (jo_is_pad1_key_pressed(JO_KEY_UP) && light.y > 0) {
+        else if (jo_is_pad1_key_pressed(JO_KEY_DOWN) && light.y > 0) {
             light.y -= 1;
             do_update = true;
         }	
+        if (jo_is_pad1_key_pressed(JO_KEY_RIGHT)&& light.x < 255) {
+            light.x += 1;
+            do_update = true;
+        }
+        else if (jo_is_pad1_key_pressed(JO_KEY_LEFT)&& light.x > 0) {
+            light.x -= 1;
+            do_update = true;
+        }
         // darkness
         if (jo_is_pad1_key_pressed(JO_KEY_C) && image.darkness > 0) {
             image.darkness -= 1;
@@ -134,21 +142,12 @@ void my_input(void)
             image.darkness += 1;
             do_update = true;
         }
-        if (jo_is_pad1_key_pressed(JO_KEY_RIGHT)&& light.x < 255) {
-            light.x += 1;
-            do_update = true;
-        }
-        else if (jo_is_pad1_key_pressed(JO_KEY_LEFT)&& light.x > 0) {
-            light.x -= 1;
-            do_update = true;
-        }
         // reset
         if (jo_is_pad1_key_down(JO_KEY_START)) {
             MultiHslTorRgb(&hslPal, &rgbPal, &range);
             InitNormalImage(&hslPal, &range, &image);
             light.z = 255;
             normal_lighting(&hslPal, &rgbPal, &light, &range, &image);
-            min_max_sl_id(&hslPal, &range, &img_attr);
             MultiPaletteUpdate(&bg_palette, &hslPal, &hsl_increment, &range);
             do_update = false;
         }
@@ -249,7 +248,7 @@ void my_input(void)
 void my_color_calc(void)
 {
     if (do_update) {
-        if (normal_map_mode) {
+        if (NORMAL_MAP_MODE) {
             MultiLuminanceSet(&hslPal, &range, &image);
             normal_lighting(&hslPal, &rgbPal, &light, &range, &image);
         }
@@ -264,17 +263,11 @@ jo_palette      *my_sprite_palette_handling(void)
     jo_create_palette(&light_source);
     return (&light_source);
 }
-
-jo_palette      *my_gradient_palette_handling(void)
-{
-    jo_create_palette(&gradient);
-    return (&gradient);
-}
 void                init_graphics(void) {
     init_background();
     // load palettes into data structures
     MultiRgbToHsl(&hslPal, &rgbPal, &range);
-    if (normal_map_mode) {
+    if (NORMAL_MAP_MODE) {
         // light (completely fake, it's only here for visual effect)
         jo_set_tga_palette_handling(my_sprite_palette_handling);
         jo_sprite_add_tga("TEX", "LIGHT.TGA", 1); // use 5 for transparent background color
@@ -289,13 +282,12 @@ jo_palette      *my_gradient_palette_handling(void)
         normal_lighting(&hslPal, &rgbPal, &light, &range, &image);
     }
     // set initial image colors
-    min_max_sl_id(&hslPal, &range, &img_attr);
     MultiPaletteUpdate(&bg_palette, &hslPal, &hsl_increment, &range);
 }
 
 void			jo_main(void)
 {
-        // increase the default heap size. LWRAM is not being used
+        // increase the default heap size. LWRAM is not being used (not really needed for this demo, I did use it for some larger backgrounds)
         jo_add_memory_zone((unsigned char *)LWRAM, LWRAM_HEAP_SIZE);
         
 	jo_core_init(JO_COLOR_Black);
