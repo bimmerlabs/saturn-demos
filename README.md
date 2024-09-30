@@ -1,5 +1,9 @@
 # saturn-demos
 ### Various demos for the Sega Saturn
+## VDP2 Normal Mapping
+Based on the HSL to RGB Demo - Real-time normal mapping using palettes to generate normal maps for multiple unique surfaces, including 2 VDP2 planes and multiple scaled sprites / polygons.
+![image](https://github.com/user-attachments/assets/b0283c5e-49b6-43ec-a79f-14ef29351df8)
+[Watch on Youtube](https://youtu.be/7WHxGJPBFT8)
 ## HSL to RGB Demo
 Based on an HSL color model I found in the [Sonic Mania decompilation](https://github.com/RSDKModding/Sonic-Mania-Decompilation), modified for the Saturn.  Change either a single palette index or multiple palette indexes simulaneously, to adjust Hue, Saturation, or Brightness of an entire background image or sprite.  [Use TGA Tools](https://github.com/bimmerlabs/TGA-Tools) to generate the necessary data structures for your project.
 ![image](https://github.com/user-attachments/assets/50df1d69-58dd-4aa7-9602-765deac8e36e)
