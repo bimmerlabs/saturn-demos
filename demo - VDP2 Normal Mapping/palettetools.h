@@ -1,8 +1,9 @@
 #ifndef PALETTETOOLS_H
 #define PALETTETOOLS_H
-
 #include <jo/jo.h>
-#include "palette_config.h"
+
+#define MAX_PALETTE_ENTRIES 256
+// #define MAX_PALETTE_GROUPS 8 // adding more groups reduces how many colors you can have in the normal map
 
 // Struct definitions
 typedef struct {
@@ -28,40 +29,38 @@ typedef struct {
     Uint8 upper;
 } PaletteRange;
 
-typedef struct {
-    Uint8 lower;
-    Uint8 upper;
-} PaletteGroup;
-
 typedef struct
 {
-    PaletteGroup group[NUM_PALETTE_GROUPS]; // need to replace with variable length arrays I think..
-} PaletteGroupList;
-
-typedef struct
-{
-    ObjectColor color[NUM_PALETTE_ENTRIES+1];
+    ObjectColor color[MAX_PALETTE_ENTRIES];
 } RgbPalette;
 
 typedef struct
 {
-    FIXED color[NUM_PALETTE_ENTRIES+1];
+    FIXED color[MAX_PALETTE_ENTRIES];
 } RgbBuff;
 
 typedef struct
 {
-    ObjectHSL color[NUM_PALETTE_ENTRIES+1];
+    ObjectHSL color[MAX_PALETTE_ENTRIES];
 } HslPalette;
 
 extern Bool do_update;
 extern Bool update_palette;
 
 typedef struct {
+    Uint16 hue;
+    Uint8 sat;
+    Uint8 lum;
+    FIXED x_pos;
+    FIXED y_pos;
+    FIXED x_scroll;
+    FIXED y_scroll;
     Uint8 min_sat_id;
     Uint8 max_sat_id;
     Uint8 min_lum_id;
     Uint8 max_lum_id;
-} ImgAttributes;    
+} ImageAttr;
+ 
 
 // Function prototypes
 void clamp_hue(ObjectHSL *hsl);
@@ -75,8 +74,6 @@ void UpdatePaletteFromBuffer(RgbBuff *bufferPal, jo_palette *palette, PaletteRan
 void MultiRgbToHsl(HslPalette *hslPal, RgbPalette *rgbPal, PaletteRange *range);
 void MultiHslTorRgb(HslPalette *hslPal, RgbPalette *rgbPal, PaletteRange *range);
 
-void min_max_sl_id(HslPalette *hslPal, PaletteRange *range, ImgAttributes *img_attr);
-
-void InitNormalImage(HslPalette *hslPal, PaletteRange *range, ImageConfig *image);
+void min_max_sl_id(HslPalette *hslPal, PaletteRange *range, ImageAttr *attr);
 
 #endif // PALETTETOOLS_H

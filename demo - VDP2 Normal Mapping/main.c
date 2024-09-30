@@ -27,118 +27,136 @@
  */
 
 #include <jo/jo.h>
-#include <jo/vdp2.h>
-#include "palettetools.h"
-#include "lighting.h"
 #include "font.h"
-#include "ColorHelpers.h"
-#include "background.h"
 #include "input.h"
+#include "sprites.h"
+// background images here
+#include "BG_DEF/rocks.h"
+#include "BG_DEF/tiles.h"
+#include "BG_DEF/flower.h"
 
 // GROUND
-jo_pos3Df	pos1;
-jo_rot3Df	rot;
+jo_pos3D_fixed	pos1;
+jo_rot3D_fixed	rot1;
 // SKY
-jo_pos3Df	pos2;
-jo_rot3Df	rot2;
+jo_pos3D_fixed	pos2;
+jo_rot3D_fixed	rot2;
+// FLOWER
+jo_pos3D_fixed	pos3;
+jo_rot3D_fixed	rot3;
 
-FIXED	scrollx;
-static float 	windspeed = 5.0f;
-static int	movement_speed = 2;
-
-const FIXED HORIZON = toFIXED(151);
-const FIXED LIGHT_SPEED = toFIXED(0.2);
-
-// day / night cycle
-static Uint8  sun_sprite;
-static Uint8  moon_sprite;
-static Uint8  curr_sprite;
-
-jo_palette light_pal;
-
-ImgAttributes ground_attr = {0, 0, 0, 0};
+const FIXED rotation_speed = toFIXED(0.2);
+const FIXED LIGHT_SPEEDX   = toFIXED(0.4);
+const FIXED LIGHT_SPEEDY   = toFIXED(0.2);
 
 void                my_draw(void)	{
-	// light - fake, needs to replaced with a 3D light
-	if (draw_light && light.z > HORIZON && light.y < FIXED_127) { // draw the "light" only if it's above the horizon (depends on RGB0 plane angle)
-            jo_3d_push_matrix();
-            jo_3d_translate_matrix_fixed(-4*(light.x-FIXED_127), -2*(light.z-FIXED_127), FIXED_255);
-            jo_3d_draw_sprite(curr_sprite);
-            jo_3d_pop_matrix();
+        my_sprite_draw(&flower1_palette, &flower1_spr_id, &pos3, &rot3);
+        if (sprite_scale_up) {
+            sprite_scale_counter += 1;
         }
+        else if (!sprite_scale_up) {
+            sprite_scale_counter -= 1;
+        }
+        
+        if (sprite_scale_counter > 254) {
+            sprite_scale_up = false;
+        }
+        else if (sprite_scale_counter < -254)  {
+            sprite_scale_up = true;
+        }
+            
+        for (int i = 0; i < NUM_SPRITES; i++) {
+            if (sprite_scale_up) {
+                sprite_pos[i].z += JO_FIXED_1;
+            }
+            else {
+                sprite_pos[i].z -= JO_FIXED_1;
+            }
+            my_sprite_draw(&sprite_pal[i], &sprite_id[i], &sprite_pos[i], &rot3);
+        }
+            
 	if (start_animation) {
-                light.x -= LIGHT_SPEED;
-                if (light.x < JO_FIXED_0)
-                    light.x = FIXED_255;
-                tile1_increment.h += 1;           
+                light1.x += LIGHT_SPEEDX;
+                light2.x += LIGHT_SPEEDX;
+                if (light1.x > FIXED_255) {
+                    light1.x = JO_FIXED_0;
+                    light2.x = JO_FIXED_0;
+                }
+                light1.y -= LIGHT_SPEEDY;
+                light2.y -= LIGHT_SPEEDY;
+                if (light1.y < JO_FIXED_0) {
+                    light1.y = FIXED_255;
+                    light2.y = FIXED_255;
+                }
+                
+                light3.x += LIGHT_SPEEDY;
+                if (light3.x > FIXED_255) {
+                    light3.x = JO_FIXED_0;
+                    light3.y += FIXED_127;
+                    if (light3.y > FIXED_255) {
+                        light3.y = toFIXED(100);
+                    }
+                }
+
+                hsl_incRocks0.h += 1;           
+                hsl_incTiles0.h -= 1;           
                 move_light = true;
                 do_update = true;
-	}
-	if (light.x == FIXED_255 && light.z == JO_FIXED_0 && curr_sprite == sun_sprite) {
-	    curr_sprite = moon_sprite;
-	}
-	else if (light.x == FIXED_255 && light.z == JO_FIXED_0 && curr_sprite == moon_sprite) {
-	    curr_sprite = sun_sprite;
-	}
+                
+                // RBG0 position
+                rot1.rx += JO_DEG_TO_RAD(rotation_speed);
+                rot1.rz += JO_DEG_TO_RAD(rotation_speed);
+                rot2.rx += JO_DEG_TO_RAD(rotation_speed);
+                rot2.rz += JO_DEG_TO_RAD(rotation_speed);
+                
+                // FLOWER
+                rot3.rz += JO_DEG_TO_RAD(rotation_speed);
 
-	// RBG0 position
-	scrollx += jo_int2fixed(movement_speed);
-	pos1.x -= movement_speed * jo_cos_radf(rot.rz) / 10.0;
-	pos2.x -= movement_speed * jo_cos_radf(rot2.rz) / 100.0;
-        if (pos1.x >=256.0) {
-        	pos1.x = 0.0;
+                // ROCKS
+                jo_3d_push_matrix();
+                {
+                    my_fixed_3d_rotate_matrix_rad(&rot1);
+                    my_fixed_3d_translate_matrix(&pos1);
+                    jo_background_3d_plane_a_draw(true);
+                }
+                jo_3d_pop_matrix();
+                
+                // TILES
+                jo_3d_push_matrix();
+                {
+                    my_fixed_3d_rotate_matrix_rad(&rot2);
+                    my_fixed_3d_translate_matrix(&pos2);
+                    jo_background_3d_plane_b_draw(draw_plane_b);
+                }
+                jo_3d_pop_matrix();
         }
-        if (pos2.x >=256.0) {
-        	pos2.x = 0.0;
-        }
-	if (pos1.y >=256.0) {
-        	pos1.y = 0.0;
-        }
-        if (pos2.y >=256.0) {
-        	pos2.y = 0.0;
-        }
-
-	// GROUND
-	jo_3d_push_matrix();
-	{
-		jo_3d_rotate_matrix_rad(rot.rx, rot.ry, rot.rz);
-		jo_3d_translate_matrixf(pos1.x, pos1.y, pos1.z);
-		jo_background_3d_plane_a_draw(true);
-	}
-	jo_3d_pop_matrix();
-	// SKY
-	pos2.x -= windspeed / 1000;
-	pos2.y -= windspeed / 500;
-	jo_3d_push_matrix();
-	{
-		jo_3d_rotate_matrix_rad(rot.rx, rot.ry, rot2.rz);
-		jo_3d_translate_matrixf(pos2.x, pos2.y, pos2.z);
-		jo_background_3d_plane_b_draw(draw_plane_b);
-	}
-	jo_3d_pop_matrix();
 }
 
 void                title_text(void)	{
-	jo_nbg2_clear();
-	jo_nbg2_printf(4, 2, "VDP2 PLANE NORMAL MAP WITH LIGHTING");
+	jo_nbg0_clear();
+        jo_nbg0_printf(14, 2, "NORMAL MAP DEMO");
 }
 
 void                debug_text(void)	{
-        jo_nbg2_printf(3, 4, "LIGHT:  X=%3i, Y=%3i, Z=%3i", JO_FIXED_TO_INT(light.x), JO_FIXED_TO_INT(light.y), JO_FIXED_TO_INT(light.z));
-        jo_nbg2_printf(3, 5, "TILE1:  H=%3i, S=%3i, L=%3i", hslGround.color[0].h, hslGround.color[0].s, hslGround.color[0].l);
-        jo_nbg2_printf(3, 6, "TILE2:  H=%3i, S=%3i, L=%3i", hslGround.color[37].h, hslGround.color[37].s, hslGround.color[37].l);
+        jo_nbg0_printf(3, 4, "LIGHT1:  X=%3i, Y=%3i, Z=%3i", JO_FIXED_TO_INT(light1.x), JO_FIXED_TO_INT(light1.y), JO_FIXED_TO_INT(light1.z));
+        jo_nbg0_printf(3, 5, "LIGHT2:  X=%3i, Y=%3i, Z=%3i", JO_FIXED_TO_INT(light2.x), JO_FIXED_TO_INT(light2.y), JO_FIXED_TO_INT(light2.z));
+        jo_nbg0_printf(3, 6, "LIGHT3:  X=%3i, Y=%3i, Z=%3i", JO_FIXED_TO_INT(light3.x), JO_FIXED_TO_INT(light3.y), JO_FIXED_TO_INT(light3.z));
+        jo_nbg0_printf(3, 7, "TILE1:  H=%3i, S=%3i, L=%3i", hslRocks.color[0].h, hslRocks.color[0].s, hslRocks.color[0].l);
+        jo_nbg0_printf(3, 8, "TILE2:  H=%3i, S=%3i, L=%3i", hslRocks.color[37].h, hslRocks.color[37].s, hslRocks.color[37].l);
 }
 
 void my_color_calc(void)
 {
     if (move_light) {
-        // not just for the sprite - this affects the actual lighting calculation
-        light_position_ellipse_float(&light);
+        light_position_ellipse_float(&light1);
+        light_position_ellipse_float(&light2);
+        light_position_ellipse_float(&light3);
         move_light = false;
     }
     if (do_update) {
-        NormalMapLighting2d(&hslGround, &rgbGround, &bufferPal, &light, &tile1_range, &tile1_increment);
-        NormalMapLighting2d(&hslGround, &rgbGround, &bufferPal, &light, &tile2_range, &tile2_increment);
+        update_flower_color();
+        update_tiles_color();
+        update_rocks_color();
         update_palette = true;
         do_update = false;
     }
@@ -146,8 +164,10 @@ void my_color_calc(void)
 
 void my_palette_update(void)
 {
-    if (update_palette) {
-        UpdatePaletteFromBuffer(&bufferPal, &ground_palette, &tile_range);
+    if (update_palette) {        
+        update_flower_palette();
+        update_tiles_palette();
+        update_rocks_palette();
     }
     title_text();
     if (debugtxt) {
@@ -155,72 +175,52 @@ void my_palette_update(void)
     }
 }
 
-jo_palette      *my_light_palette_handling(void)
-{
-    jo_create_palette(&light_pal);
-    return (&light_pal);
-}
-
 void                init_graphics(void)	{
     jo_enable_background_3d_plane(JO_COLOR_Black);
-    
-    // light
-    jo_set_tga_palette_handling(my_light_palette_handling);
-    sun_sprite = jo_sprite_add_tga(JO_ROOT_DIR, "SUN.TGA", 0);
-    jo_sprite_set_palette(light_pal.id);
-    moon_sprite = jo_sprite_add_tga(JO_ROOT_DIR, "MOON.TGA", 0);
-    jo_sprite_set_palette(light_pal.id);
-    curr_sprite = sun_sprite;
 
-    jo_core_set_screens_order(JO_NBG2_SCREEN, JO_RBG0_SCREEN, JO_SPRITE_SCREEN);
-    slColorCalc(CC_ADD | CC_TOP);
-    slColorCalcOn(JO_RBG0_SCREEN);
-
-    init_sky();
-    MultiRgbToHsl(&hslSky, &rgbSky, &sky_range);
-
-    init_ground();
-    // tile1
-    InitNormalImage(&hslGround, &tile1_range, &tile1_img);
-    normal_init_2d(&hslGround, &rgbGround, &light, &tile1_range);
-    // tile2
-    InitNormalImage(&hslGround, &tile2_range, &tile2_img);
-    normal_init_2d(&hslGround, &rgbGround, &light, &tile2_range);
-    min_max_sl_id(&hslGround, &tile2_range, &ground_attr); // so you can adjust the saturation manually without overflowing
-    
-    // set initial image colors
-    MultiPaletteUpdate(&ground_palette, &hslGround, &tile1_increment, &tile_range);
-    MultiPaletteUpdate(&sky_palette, &hslSky, &sky_increment, &sky_range);
+    jo_core_set_screens_order(JO_NBG2_SCREEN, JO_SPRITE_SCREEN, JO_RBG0_SCREEN);
+    init_flower_img();
+    init_tiles_img();
+    init_rocks_img();
 
     // Set initial RBG0 position
-    pos1.x = 110.0; // pos1 = ground
-    pos2.x = 0.0; // pos2 = sky
-    pos1.y = 0.0;
-    pos2.y = 0.0;
-    pos1.z = -60.0;
-    pos2.z = 100.0;
-    rot.rx = JO_DEG_TO_RAD(100); // horizon - 100 for 352x240, 110 for 704x448
-    rot.ry = JO_DEG_TO_RAD(0.0);
-    rot.rz = JO_DEG_TO_RAD(0);
-    rot2.rz = JO_DEG_TO_RAD(0.0);
+    // ROCKS
+    pos1.x = toFIXED(176);
+    pos1.y = toFIXED(224);
+    pos1.z = toFIXED(100.0);
+    rot1.rx = JO_DEG_TO_RAD(toFIXED(-90));
+    rot1.ry = JO_DEG_TO_RAD(JO_FIXED_0);
+    rot1.rz = JO_DEG_TO_RAD(JO_FIXED_0);
+    // tiles
+    pos2.x = toFIXED(176);
+    pos2.y = toFIXED(224);
+    pos2.z = toFIXED(-300.0);
+    rot2.rx = JO_DEG_TO_RAD(toFIXED(-90));
+    rot2.ry = JO_DEG_TO_RAD(JO_FIXED_0);
+    rot2.rz = JO_DEG_TO_RAD(JO_FIXED_0);
+    // flower initial position
+    initialize_sprite_positions();
+    pos3.x = JO_FIXED_0;
+    pos3.y = JO_FIXED_0;
+    pos3.z = FIXED_255;
 }
 
 void my_input_callback(void) {
-    my_input(&light, &tile2_increment, &hslGround, &ground_attr);
+    my_input(&light1, &light2, &hsl_incRocks0, &hslRocks, &attrRocks0);
 }
 
 void                jo_main(void)	{
-	jo_core_init(JO_COLOR_Black);
-        jo_core_tv_off();
-        init_font();
-	init_graphics();
-        jo_core_tv_on();
-        
-	jo_core_add_callback(my_input_callback);
-	jo_core_add_callback(my_color_calc);
-	jo_core_add_vblank_callback(my_palette_update);
-	jo_core_add_callback(my_draw);
-	jo_core_run();
+    jo_core_tv_off();
+    jo_core_init(JO_COLOR_Black);
+    init_font();
+    init_graphics();
+
+    jo_core_add_callback(my_input_callback);
+    jo_core_add_callback(my_color_calc);
+    jo_core_add_vblank_callback(my_palette_update);
+    jo_core_add_callback(my_draw);
+    jo_core_tv_on();
+    jo_core_run();
 }
 
 /*

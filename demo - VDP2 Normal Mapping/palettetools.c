@@ -65,33 +65,26 @@ void MultiHslTorRgb(HslPalette *hslPal, RgbPalette *rgbPal, PaletteRange *range)
 }
 
 // tools
-void min_max_sl_id(HslPalette *hslPal, PaletteRange *range, ImgAttributes *img_attr) {
-    img_attr->min_sat_id = range->lower;
-    img_attr->max_sat_id = range->upper;
+void min_max_sl_id(HslPalette *hslPal, PaletteRange *range, ImageAttr *attr) {
+    attr->min_sat_id = range->lower;
+    attr->max_sat_id = range->upper;
     for (int i = range->lower; i <= range->upper; i++) {
-        if (hslPal->color[i].s < hslPal->color[img_attr->min_sat_id].s) {
-            img_attr->min_sat_id = i;
+        if (hslPal->color[i].s < hslPal->color[attr->min_sat_id].s) {
+            attr->min_sat_id = i;
         }
-        if (hslPal->color[i].s > hslPal->color[img_attr->max_sat_id].s) {
-            img_attr->max_sat_id = i;
+        if (hslPal->color[i].s > hslPal->color[attr->max_sat_id].s) {
+            attr->max_sat_id = i;
         }
     }
-    img_attr->min_lum_id = range->lower;
-    img_attr->max_lum_id = range->upper;
+    attr->min_lum_id = range->lower;
+    attr->max_lum_id = range->upper;
     for (int i = range->lower; i <= range->upper; i++) {
-        if (hslPal->color[i].l < hslPal->color[img_attr->min_lum_id].l) {
-            img_attr->min_lum_id = i;
+        if (hslPal->color[i].l < hslPal->color[attr->min_lum_id].l) {
+            attr->min_lum_id = i;
         }
-        if (hslPal->color[i].l > hslPal->color[img_attr->max_lum_id].l) {
-            img_attr->max_lum_id = i;
+        if (hslPal->color[i].l > hslPal->color[attr->max_lum_id].l) {
+            attr->max_lum_id = i;
         }
     }
 }
 
-void InitNormalImage(HslPalette *hslPal, PaletteRange *range, ImageConfig *image) {
-    for (int i = range->lower; i <= range->upper; i++) {
-        hslPal->color[i].h = image->hue;
-        hslPal->color[i].s = image->sat;
-        hslPal->color[i].l = image->lum;
-    }
-}

@@ -7,9 +7,11 @@ JO_COMPILE_WITH_PSEUDO_MODE7_MODULE = 0
 JO_COMPILE_WITH_EFFECTS_MODULE = 0
 JO_COMPILE_WITH_DUAL_CPU_MODULE = 0
 JO_COMPILE_WITH_PRINTF_MODULE = 0
-JO_DEBUG = 1
+JO_DEBUG = 0
+JO_NTSC = 1
+JO_480i = 0
 JO_COMPILE_USING_SGL=1
-SRCS=main.c lighting.c math.c font.c ColorHelpers.c palettetools.c input.c
+SRCS=main.c lighting.c math.c font.c ColorHelpers.c palettetools.c input.c sprites.c
 JO_ENGINE_SRC_DIR=../../jo_engine
 COMPILER_DIR=../../Compiler
 include $(COMPILER_DIR)/COMMON/jo_engine_makefile

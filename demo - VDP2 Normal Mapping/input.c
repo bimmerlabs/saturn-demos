@@ -1,30 +1,34 @@
 #include "input.h"
 
-Bool start_animation = false;
+Bool start_animation = true;
 Bool move_light = false;
-Bool draw_light = true;
+Bool draw_light = false;
 Bool debugtxt = false;
 Bool draw_plane_b = true;
 
-void    my_input(LightSource *_light, GlobalHSL *_increment, HslPalette *_hslPal, ImgAttributes *_attr)	{
+void    my_input(LightSource *_light1, LightSource *_light2, GlobalHSL *_increment, HslPalette *_hslPal, ImageAttr *_attr)	{
         // move light
-        if (jo_is_pad1_key_pressed(JO_KEY_UP) && _light->y > JO_FIXED_0) {
-            _light->y -= JO_FIXED_1;
+        if (jo_is_pad1_key_pressed(JO_KEY_UP) && _light1->y > JO_FIXED_0) {
+            _light1->y -= JO_FIXED_1;
+            _light2->y -= JO_FIXED_1;
             move_light = true;
             do_update = true;
         }
-        else if (jo_is_pad1_key_pressed(JO_KEY_DOWN) && _light->y < FIXED_255) {
-            _light->y += JO_FIXED_1;
+        else if (jo_is_pad1_key_pressed(JO_KEY_DOWN) && _light1->y < FIXED_255) {
+            _light1->y += JO_FIXED_1;
+            _light2->y += JO_FIXED_1;
             move_light = true;
             do_update = true;
         }	
-        if (jo_is_pad1_key_pressed(JO_KEY_RIGHT)&& _light->x > JO_FIXED_0) {
-            _light->x -= JO_FIXED_1;
+        if (jo_is_pad1_key_pressed(JO_KEY_RIGHT) && _light1->x > JO_FIXED_0) {
+            _light1->x -= JO_FIXED_1;
+            _light2->x -= JO_FIXED_1;
             move_light = true;
             do_update = true;
         }
-        else if (jo_is_pad1_key_pressed(JO_KEY_LEFT)&& _light->x < FIXED_255) {
-            _light->x += JO_FIXED_1;
+        else if (jo_is_pad1_key_pressed(JO_KEY_LEFT)&& _light1->x < FIXED_255) {
+            _light1->x += JO_FIXED_1;
+            _light2->x += JO_FIXED_1;
             move_light = true;
             do_update = true;
         }

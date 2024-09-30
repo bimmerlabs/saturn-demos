@@ -10,6 +10,6 @@ extern Bool draw_light;
 extern Bool debugtxt;
 extern Bool draw_plane_b;
 
-void	my_input(LightSource *_light, GlobalHSL *_increment, HslPalette *_hslGround, ImgAttributes *_ground_attr);
+void	my_input(LightSource *_light1, LightSource *_light2, GlobalHSL *_increment, HslPalette *_hslGround, ImageAttr *_attr);
 
 #endif // INPUT_H
