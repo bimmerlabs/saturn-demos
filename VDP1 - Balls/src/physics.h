@@ -2,20 +2,7 @@
 #include <srl.hpp>
 #include "sprites.h"
 
-#define MIN_VELOCITY_X Fxp(7)
-#define MIN_VELOCITY_Y Fxp(3)
-#define MAX_VELOCITY_Z Fxp(70) // originally 70
-#define MEDIUM_MAX_VELOCITY Fxp(10.5) // 8 = easy, 10 = medium, 13 = hard?
-#define BALL_FRICTION_Y Fxp(1.75)
-#define BALL_FRICTION_X Fxp(1.15)
-#define BALL_ROTATION Fxp(1.7) // IDEA:  PICK UP A BOOMERANG ITEM - MAKE THIS NUMBER HIGHER?
-#define REBOUND Fxp(0.1) // the lower this is, the bigger the rebound?
-#define FRICTION_COEFFICIENT Fxp(0.01) // Adjust this value to alter the ball curve
-#define ITEM_RADIUS 32
-
-#define Fxp_0 Fxp(0)
-#define Fxp_1 Fxp(1)
-#define Fxp_360 Fxp(360)
+#define BALL_MAX_VELOCITY Fxp(10.5)
 
 using namespace SRL::Types;
 using namespace SRL::Math::Types;
@@ -38,7 +25,7 @@ static const Fxp screenBottom = 112;
 
 // Function to initialize the ball's movement
 static inline void start_ball_movement(Sprite *ball) {    
-    maxBallVelocity = MEDIUM_MAX_VELOCITY;
+    maxBallVelocity = BALL_MAX_VELOCITY;
     int16_t xVel = rnd.GetNumber(-maxspeed, maxspeed);
     int16_t yVel = rnd.GetNumber(-maxspeed, maxspeed);
     ball->vel.x = Fxp(xVel);

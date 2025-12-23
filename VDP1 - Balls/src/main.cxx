@@ -32,15 +32,8 @@ using namespace SRL::Types;
 using namespace SRL::Math::Types;
 using namespace SRL::Input;
 
-static uint8_t frameTimer;
 static uint16_t currentBalls;
 static uint8_t currentTilemap = 0;
-
-#ifdef SRL_HIGH_RES
-static const Fxp spriteScale  = 1.0;
-#else
-static const Fxp spriteScale  = 1.0;
-#endif
 
 Sprite Ball[maxBalls] = {};
 
@@ -54,20 +47,17 @@ SRL::CRAM::Palette LoadSpritePalette(uint16_t* palData)
 
     if (cramPalette.Load((SRL::Types::HighColor*)palData, 256) >= 0)
     {
-        // Mark bank as in use
         SRL::CRAM::SetBankUsedState(id, mode, true);
     }
     return cramPalette;
 }
 
-// Palette for logo
 uint16_t* init_game_palette(void)
 {
     SRL::CRAM::Palette gamePalette  = LoadSpritePalette(game_pal);
     return game_pal;
 }
 
-// Alias for better readability of the sample
 using Trig = SRL::Math::Trigonometry;
 
 static bool EndCodeDisable = true;
@@ -90,10 +80,7 @@ int main()
 {
 	SRL::Core::Initialize(HighColor::Colors::Black);
 	
-	// enable Endcodes
     SRL::Scene2D::SetEffect(SRL::Scene2D::SpriteEffect::EnableECD, EndCodeDisable);
-    // SRL::Scene2D::SetEffect(SRL::Scene2D::SpriteEffect::EnableHSS, HSSEnable);
-    // SRL::Scene2D::SetEffect(SRL::Scene2D::SpriteEffect::DisablePreClip, PreClipDisable);
     
 	#ifdef SRL_HIGH_RES
     slZoomNbg0(toFIXED(0.50), toFIXED(0.5));
@@ -109,7 +96,6 @@ int main()
     Balls = new TilemapObject("BALLS.TM", PaletteID, false);     
 
     for (uint16_t i = 0; i < maxBalls; i++) {
-        // .isColliding = false,
         Ball[i].pos = {Fxp(0), Fxp(0), Fxp(100), Fxp(32)};
         Ball[i].scl = {spriteScale, spriteScale};
         Ball[i].rot = {0, 0, 0};
@@ -131,22 +117,15 @@ int main()
     }
     currentBalls = 750;
     
-    // Initialize gamepad on port 0
     Digital port0(0);
     
+    SRL::Debug::Print(2, 1, "Resolution: %dx%d", screenWidth, screenHeight);
     SRL::Debug::Print(2, 2, "Sprites: %d  ", currentBalls);
     SRL::Debug::Print(2, 3, "Size: 2x1");
     SRL::Debug::Print(2, 4, "Renderer: SGL (direct)");
     
 	while(1)
-	{
-	 
-        // SRL::Debug::Print(2, 2, "Sprites: %d  ", currentBalls);
-        // SRL::Debug::Print(2, 3, "Frame: %3d", frameTimer);
-        // SRL::Debug::Print(2, 3, "ECD:   %d", EndCodeDisable);
-        // SRL::Debug::Print(2, 4, "HSS:   %d", HSSEnable);
-        // SRL::Debug::Print(2, 6, "PclpD: %d", PreClipDisable);
-        
+	{   
         for (uint16_t i = 0; i < currentBalls; i++) {
             switch (PauseMovement)
             {
@@ -192,12 +171,12 @@ int main()
                 }
                 default:                
                 {
-                    my_sprite_draw_hv(&Ball[i]);
+                    my_sprite_draw(&Ball[i]);
                     break;
                 }
             }
         }
-
+        
             switch (port0.IsHeld(Digital::Button::Up))
             {
                 case true:
@@ -449,7 +428,6 @@ int main()
             // if (port0.WasPressed(Digital::Button::Z))
             // {
             // }
-
 
         SRL::Core::Synchronize();
 	}
