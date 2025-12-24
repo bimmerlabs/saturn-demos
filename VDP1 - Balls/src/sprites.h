@@ -11,6 +11,9 @@
 #ifdef SRL_HIGH_RES
 static const int16_t screenWidth  = 704;
 static const int16_t screenHeight = 480;
+#elif SRL_HIGH_RES_NON_INTERLACED
+static const int16_t screenWidth  = 704;
+static const int16_t screenHeight = 240;
 #else
 static const int16_t screenWidth  = 352;
 static const int16_t screenHeight = 224;
@@ -39,6 +42,10 @@ typedef struct {
 typedef struct {
     Fxp x, y, z;
 } Velocity;
+
+// typedef struct {
+    // uint8_t p1, p2, p3, p4;
+// } PolygonPoints;
 
 typedef struct _BoundingBox
 {
@@ -70,12 +77,12 @@ typedef struct {
     int    flip;
     uint16_t    mesh;
     uint16_t    zmode;
+    uint16_t    color;
     Animation anim[2];
 } Sprite;
 
-// characters
 extern Sprite Ball[maxBalls];
-// extern uint16_t spritecount;
+// extern PolygonPoints Polygon;
 
 SRL::Math::Random<int16_t> rnd = SRL::Math::Random<int16_t>(1);
 
@@ -90,5 +97,5 @@ static inline void set_sprite_position(Sprite *sprite) {
 static inline void	my_sprite_draw(Sprite *sprite) {
 	FIXED pos[XYZSS] = { sprite->pos.x.RawValue(), sprite->pos.y.RawValue(), sprite->pos.z.RawValue(), sprite->scl.x.RawValue(), sprite->scl.y.RawValue() };
 	SPR_ATTR attr = SPR_ATTRIBUTE( sprite->id, 0, No_Gouraud, sprite->mesh | Pclpon | HSSoff | ECenb | CL256Bnk, sprite->flip | sprite->zmode );
-	slDispSpriteHV(pos, &attr, 0); // faster because it doesn't do a degree-to-angle conversion, which uses floats
+	slDispSpriteHV(pos, &attr, 0);
 }

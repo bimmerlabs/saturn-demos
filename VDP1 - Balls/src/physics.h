@@ -15,6 +15,12 @@ static const Fxp screenLeft   = -352;
 static const Fxp screenRight  = 352;
 static const Fxp screenTop    = -240;
 static const Fxp screenBottom = 240;
+#elif SRL_HIGH_RES_NON_INTERLACED 
+static const uint16_t maxspeed = 3;
+static const Fxp screenLeft   = -352;
+static const Fxp screenRight  = 352;
+static const Fxp screenTop    = -120;
+static const Fxp screenBottom = 120;
 #else
 static const uint16_t maxspeed = 3;
 static const Fxp screenLeft   = -176;
@@ -30,6 +36,23 @@ static inline void start_ball_movement(Sprite *ball) {
     int16_t yVel = rnd.GetNumber(-maxspeed, maxspeed);
     ball->vel.x = Fxp(xVel);
     ball->vel.y = Fxp(yVel);
+}
+
+// fastest so far with linedraw
+static inline void update_ball(Sprite* ball)
+{
+    ball->pos.x += ball->vel.x;
+    ball->pos.y += ball->vel.y;
+
+    if (ball->pos.x > screenRight || ball->pos.x < screenLeft)
+    {
+        ball->vel.x = -ball->vel.x;
+    }
+
+    if (ball->pos.y > screenBottom || ball->pos.y < screenTop)
+    {
+        ball->vel.y = -ball->vel.y;
+    }
 }
 
 // // Function to update the ball's position and check for collisions (ORIGINAL)
@@ -120,23 +143,6 @@ static inline void start_ball_movement(Sprite *ball) {
     // if (hitX) ball->vel.x = -ball->vel.x;
     // if (hitY) ball->vel.y = -ball->vel.y;
 // }
-
-// fastest so far with linedraw
-static inline void update_ball(Sprite* ball)
-{
-    ball->pos.x += ball->vel.x;
-    ball->pos.y += ball->vel.y;
-
-    if (ball->pos.x > screenRight || ball->pos.x < screenLeft)
-    {
-        ball->vel.x = -ball->vel.x;
-    }
-
-    if (ball->pos.y > screenBottom || ball->pos.y < screenTop)
-    {
-        ball->vel.y = -ball->vel.y;
-    }
-}
 
 // // slightly faster than original, slower than the above
 // static inline void update_ball(Sprite* ball)
