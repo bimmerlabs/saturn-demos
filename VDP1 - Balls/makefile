@@ -2,6 +2,7 @@
 SRL_MAX_TEXTURES = 300          # Number of VDP1 texture slots
 SRL_MODE = NTSC                 # Valid options are PAL or NTSC
 SRL_HIGH_RES = 0                # 480i mode
+SRL_HIGH_RES_NON_INTERLACED = 0 # 240p mode
 SRL_DISABLE_NBG3_FONT = 0	# Don't initialize NBG3 debug font by default
 SRL_FRAMERATE = 1               # Framerate control (0=dynamic, 1=< 60/value)
 SRL_MAX_CD_BACKGROUND_JOBS = 1  # Maximum number of files GFS can open at once
