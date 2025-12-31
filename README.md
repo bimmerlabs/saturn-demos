@@ -18,3 +18,7 @@ Animated snow (or rain, etc) using palettes and scrolling NBG0
 ## Mosaic Demo:
 Use to pixelate the background for transitions
 ![MOSAIC](https://github.com/bimmerlabs/saturn-demos/assets/28711621/93c0b708-6192-443e-9ee3-988c0c9b5cfa)
+## Balls (VDP1 Stress Test)
+Test fill rate and CPU-loaded draw performance in SGL
+
+![BALLS](https://github.com/user-attachments/assets/27c8d022-efe4-4465-854b-8992d7c19648)
