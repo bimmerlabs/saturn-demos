@@ -25,6 +25,7 @@ using namespace SRL::Math::Types;
 typedef struct {
     Fxp x, y, z;
     Fxp r;
+    Fxp x1, y1 ;
 } Position;
 
 typedef struct {
@@ -42,10 +43,6 @@ typedef struct {
 typedef struct {
     Fxp x, y, z;
 } Velocity;
-
-// typedef struct {
-    // uint8_t p1, p2, p3, p4;
-// } PolygonPoints;
 
 typedef struct _BoundingBox
 {
@@ -81,8 +78,17 @@ typedef struct {
     Animation anim[2];
 } Sprite;
 
+enum
+{
+    DirectSpriteDraw = 0,
+    SrlSpriteDraw,
+    SrlPolygonDraw,
+} DRAW_MODE;
+
 extern Sprite Ball[maxBalls];
-// extern PolygonPoints Polygon;
+extern Fxp PolygonSize;
+extern bool DrawPolygon;
+extern uint8_t DrawMode;
 
 SRL::Math::Random<int16_t> rnd = SRL::Math::Random<int16_t>(1);
 

@@ -8,6 +8,7 @@ using namespace SRL::Types;
 using namespace SRL::Math::Types;
 
 static Fxp maxBallVelocity = 0.0;
+extern bool PausePhysics;
 
 #ifdef SRL_HIGH_RES
 static const uint8_t maxspeed = 12;
@@ -39,19 +40,49 @@ static inline void start_ball_movement(Sprite *ball) {
 }
 
 // fastest so far with linedraw
-static inline void update_ball(Sprite* ball)
+static inline void update_ball(Sprite* ball, SPRITE& polygon)
 {
-    ball->pos.x += ball->vel.x;
-    ball->pos.y += ball->vel.y;
+    switch (PausePhysics)
+        {
+        case true:
+        {
+            break;
+        }
+        default:
+        {
+            ball->pos.x += ball->vel.x;
+            ball->pos.y += ball->vel.y;
+            if (ball->pos.x > screenRight || ball->pos.x < screenLeft)
+            {
+                ball->vel.x = -ball->vel.x;
+            }
 
-    if (ball->pos.x > screenRight || ball->pos.x < screenLeft)
+            if (ball->pos.y > screenBottom || ball->pos.y < screenTop)
+            {
+                ball->vel.y = -ball->vel.y;
+            }
+            break;      
+        }
+    }    
+    switch (DrawMode)
     {
-        ball->vel.x = -ball->vel.x;
-    }
-
-    if (ball->pos.y > screenBottom || ball->pos.y < screenTop)
-    {
-        ball->vel.y = -ball->vel.y;
+        case SrlPolygonDraw:
+        {
+            ball->pos.x1 = ball->pos.x + PolygonSize;
+            ball->pos.y1 = ball->pos.y + PolygonSize;
+            
+            polygon.XA = ball->pos.x.As<int16_t>();
+            polygon.YA = ball->pos.y.As<int16_t>();
+            polygon.XB = ball->pos.x1.As<int16_t>();
+            polygon.YB = ball->pos.y.As<int16_t>();
+            polygon.XC = ball->pos.x1.As<int16_t>();
+            polygon.YC = ball->pos.y1.As<int16_t>();
+            polygon.XD = ball->pos.x.As<int16_t>();
+            polygon.YD = ball->pos.y1.As<int16_t>();
+            break;
+         }
+         default:
+            break;
     }
 }
 
@@ -103,61 +134,4 @@ static inline void update_ball(Sprite* ball)
     // {
         // ball->vel.y = -ball->vel.y;
     // }
-// }
-
-// // this is waaaaay slower then my original loop
-// static inline void update_ball(Sprite *ball)
-// {
-    // auto x = ball->pos.x + ball->vel.x;
-    // auto y = ball->pos.y + ball->vel.y;
-
-    // auto vx = ball->vel.x;
-    // auto vy = ball->vel.y;
-
-    // if (x > screenRight || x < screenLeft)
-        // vx = -vx;
-
-    // if (y > screenBottom || y < screenTop)
-        // vy = -vy;
-
-    // ball->pos.x = x;
-    // ball->pos.y = y;
-    // ball->vel.x = vx;
-    // ball->vel.y = vy;
-// }
-
-// // about the same as my original method
-// static inline void update_ball(Sprite *ball)
-// {
-    // ball->pos.x += ball->vel.x;
-    // ball->pos.y += ball->vel.y;
-
-    // const bool hitX =
-        // (ball->pos.x > screenRight) |
-        // (ball->pos.x < screenLeft);
-
-    // const bool hitY =
-        // (ball->pos.y > screenBottom) |
-        // (ball->pos.y < screenTop);
-
-    // if (hitX) ball->vel.x = -ball->vel.x;
-    // if (hitY) ball->vel.y = -ball->vel.y;
-// }
-
-// // slightly faster than original, slower than the above
-// static inline void update_ball(Sprite* ball)
-// {
-    // ball->pos.x += ball->vel.x;
-    // ball->pos.y += ball->vel.y;
-
-    // const bool flipX =
-        // (ball->pos.x > screenRight) |
-        // (ball->pos.x < screenLeft);
-
-    // const bool flipY =
-        // (ball->pos.y > screenBottom) |
-        // (ball->pos.y < screenTop);
-
-    // if (flipX) ball->vel.x = -ball->vel.x;
-    // if (flipY) ball->vel.y = -ball->vel.y;
 // }

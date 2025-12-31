@@ -21,13 +21,6 @@ enum
     BALLS_64X64,
 } BALL_SPRITES;// tmsf format loads in alphabetical order
 
-enum
-{
-    DirectSpriteDraw = 0,
-    SrlSpriteDraw,
-    SrlLineDraw,
-} DRAW_MODE;
-
 using namespace SRL::Types;
 using namespace SRL::Math::Types;
 using namespace SRL::Input;
@@ -63,16 +56,18 @@ using Trig = SRL::Math::Trigonometry;
 static bool EndCodeDisable = true;
 static bool HSSEnable = true;
 static bool PreClipDisable = true;
-static uint8_t DrawMode = DirectSpriteDraw; // use SRL draw routines, or SGL raw
-static bool PauseMovement = false;
-static bool DrawPolygon = false;
+static bool ScaledSprite = false;
+uint8_t DrawMode = SrlPolygonDraw; // use SRL draw routines, or SGL raw
+bool PausePhysics = false;
 static bool FilledPolygon = true;
 static uint8_t spriteid = 0;
-static Fxp PolygonSize = 1;
 
-static inline void getInputs(TilemapObject* Balls) {
-    Digital port0(0);
-    
+Fxp PolygonSize = 1;
+bool DrawPolygon = false;
+
+static SPRITE polygon[maxBalls];
+
+static inline void getInputs(Digital &port0, TilemapObject* Balls) {
     switch (port0.IsHeld(Digital::Button::Up))
     {
         case true:
@@ -166,13 +161,17 @@ static inline void getInputs(TilemapObject* Balls) {
             default:
                 break;
         }
-
+        
         for (uint16_t i = 0; i < maxBalls; i++)
         {
             Ball[i].id = Balls->sprite[currentTilemap].SpriteIndex + spriteid;
             spriteid++;
             if (spriteid > 6)
-                spriteid = 0;
+                spriteid = 0;                
+            if (DrawMode == SrlPolygonDraw && !DrawPolygon)
+            {
+                polygon[i] = SRL::Scene2D::GetSpriteCommand(SRL::Scene2D::CommandType::LineSegment, Ball[i].color);
+            }
         }
     }
 
@@ -218,7 +217,7 @@ static inline void getInputs(TilemapObject* Balls) {
             {
                 SRL::Debug::Print(2, 3, "Size: 16x16");
                 PolygonSize = 15;
-                visibleBalls = 600;
+                visibleBalls = 680;
                 break;
             }
             case BALLS_08X08:
@@ -259,27 +258,33 @@ static inline void getInputs(TilemapObject* Balls) {
             currentBalls = visibleBalls;
             SRL::Debug::Print(2, 2, "Sprites: %d  ", currentBalls);
         }
-
+        
         for (uint16_t i = 0; i < maxBalls; i++)
         {
             Ball[i].id = Balls->sprite[currentTilemap].SpriteIndex + spriteid;
             spriteid++;
             if (spriteid > 6)
-                spriteid = 0;
+                spriteid = 0;                
+            if (DrawMode == SrlPolygonDraw)
+            {                
+                if (DrawPolygon)
+                {
+                    polygon[i] = SRL::Scene2D::GetSpriteCommand(FilledPolygon ? SRL::Scene2D::CommandType::Polygon : SRL::Scene2D::CommandType::PolyLine, Ball[i].color);
+                }
+            }
         }
     }
 
     if (port0.WasPressed(Digital::Button::START))
     {
-        if (!PauseMovement)
+        PausePhysics = !PausePhysics;
+        if (!PausePhysics)
         {
-            SRL::Debug::Print(2, 5, "Pause Physics...");
-            PauseMovement = true;
+            SRL::Debug::Print(2, 6, "                ");
         }
-        else if (PauseMovement)
+        else if (PausePhysics)
         {
-            SRL::Debug::Print(2, 5, "                ");
-            PauseMovement = false;
+            SRL::Debug::Print(2, 6, "Pause Physics...");
         }
     }
 
@@ -295,9 +300,9 @@ static inline void getInputs(TilemapObject* Balls) {
     if (port0.WasPressed(Digital::Button::A))
     {
         DrawMode++;
-        if (DrawMode > SrlLineDraw)
+        if (DrawMode > SrlPolygonDraw)
             DrawMode = DirectSpriteDraw;
-        if (DrawMode == SrlLineDraw)
+        if (DrawMode == SrlPolygonDraw)
         {
             SRL::Debug::Print(2, 4, "Renderer: SRL (polygon)");
         }
@@ -314,24 +319,64 @@ static inline void getInputs(TilemapObject* Balls) {
     // if (port0.WasPressed(Digital::Button::B))
     // {
     // }
-    // if (port0.WasPressed(Digital::Button::C))
-    // {
-    // }
-    if (port0.WasPressed(Digital::Button::X))
+    
+    if (port0.WasPressed(Digital::Button::C))
+    {
+        ScaledSprite = !ScaledSprite;
+        SRL::Debug::Print(2, 5, ScaledSprite ? "Scaled Sprite: Yes" : "Scaled Sprite: No ");
+        if (ScaledSprite)
+        {
+            for (uint16_t i = 0; i < maxBalls; i++) {
+                #ifdef SRL_HIGH_RES
+                Ball[i].scl = {Fxp(2.0), Fxp(2.0)};
+                #elif SRL_HIGH_RES_NON_INTERLACED 
+                Ball[i].scl = {Fxp(2.0), Fxp(1.0)};
+                #else
+                Ball[i].scl = {Fxp(0.5), Fxp(0.5)};
+                #endif
+            }
+        }
+        else {
+            for (uint16_t i = 0; i < maxBalls; i++) {
+                #ifdef SRL_HIGH_RES
+                Ball[i].scl = {Fxp(1.0), Fxp(1.0)};
+                #elif SRL_HIGH_RES_NON_INTERLACED 
+                Ball[i].scl = {Fxp(1.0), Fxp(0.5)};
+                #else
+                Ball[i].scl = {Fxp(1.0), Fxp(1.0)};
+                #endif
+            }            
+        }
+    }
+    
+    if (port0.WasPressed(Digital::Button::X) && DrawPolygon)
     {
         FilledPolygon = !FilledPolygon;
+        for (uint16_t i = 0; i < maxBalls; i++)
+        {
+            polygon[i] = SRL::Scene2D::GetSpriteCommand(FilledPolygon ? SRL::Scene2D::CommandType::Polygon : SRL::Scene2D::CommandType::PolyLine, Ball[i].color);
+        }
     }
+    // these don't have any measurable effect in this test, so disabling
     // if (port0.WasPressed(Digital::Button::Y))
     // {
+        // PreClipDisable = !PreClipDisable;
+        // SRL::Scene2D::SetEffect(SRL::Scene2D::SpriteEffect::DisablePreClip, PreClipDisable);
+        // SRL::Debug::Print(2, 5, PreClipDisable ? "Preclip: On " : "Preclip: Off");
     // }
     // if (port0.WasPressed(Digital::Button::Z))
     // {
+        // HSSEnable = !HSSEnable;
+        // SRL::Scene2D::SetEffect(SRL::Scene2D::SpriteEffect::EnableHSS, HSSEnable);
+        // SRL::Debug::Print(2, 6, HSSEnable ? "HSS: On " : "HSS: Off");
     // }
 }
 
 int main()
 {
 	SRL::Core::Initialize(HighColor::Colors::Black);
+	
+	Digital port0(0);
 	
     SRL::Scene2D::SetEffect(SRL::Scene2D::SpriteEffect::EnableECD, EndCodeDisable);
     
@@ -346,10 +391,10 @@ int main()
     
     TilemapObject* Balls;
 
-    Balls = new TilemapObject("BALLS.TM", PaletteID, false);     
-
+    Balls = new TilemapObject("BALLS.TM", PaletteID, false);
+        
     for (uint16_t i = 0; i < maxBalls; i++) {
-        Ball[i].pos = {Fxp(0), Fxp(0), Fxp(100), Fxp(32)};
+        Ball[i].pos = {Fxp(0), Fxp(0), Fxp(100), Fxp(32), Fxp(0), Fxp(0)};
         #ifdef SRL_HIGH_RES_NON_INTERLACED 
         Ball[i].scl = {Fxp(1.0), Fxp(0.5)};
         #else
@@ -410,51 +455,33 @@ int main()
                 break;
         }
         
+        polygon[i] = SRL::Scene2D::GetSpriteCommand(SRL::Scene2D::CommandType::LineSegment, Ball[i].color);
+        
         spriteid++;
         if (spriteid > 6)
             spriteid = 0;
     }
+    
     currentBalls = 750;
     
     SRL::Debug::Print(2, 1, "Resolution: %dx%d", screenWidth, screenHeight);
     SRL::Debug::Print(2, 2, "Sprites: %d  ", currentBalls);
     SRL::Debug::Print(2, 3, "Size: 2x1");
-    SRL::Debug::Print(2, 4, "Renderer: SGL (direct)");
+    SRL::Debug::Print(2, 4, "Renderer: SRL (polygon)");
+    SRL::Debug::Print(2, 5, ScaledSprite ? "Scaled Sprite: Yes" : "Scaled Sprite: No ");
     
 	while(1)
 	{   
         for (uint16_t i = 0; i < currentBalls; i++) {
+            update_ball(&Ball[i], polygon[i]);
             switch (DrawMode)
             {
-                case SrlLineDraw:
+                case SrlPolygonDraw:
                 {
-                    if (!DrawPolygon)
-                    {
-                        SRL::Scene2D::DrawLine(
-                            Vector2D(
-                                Ball[i].pos.x,
-                                Ball[i].pos.y),
-                            Vector2D(
-                                Ball[i].pos.x+1,
-                                Ball[i].pos.y),
-                                Ball[i].color,
-                                500
-                        );
-                    }
-                    else {
-                        Vector2D Quad[4] = {
-                            { Ball[i].pos.x,     Ball[i].pos.y     },
-                            { Ball[i].pos.x + PolygonSize, Ball[i].pos.y     },
-                            { Ball[i].pos.x + PolygonSize, Ball[i].pos.y + PolygonSize },
-                            { Ball[i].pos.x,     Ball[i].pos.y + PolygonSize }
-                        };
-                        SRL::Scene2D::DrawPolygon(
-                            Quad,
-                            FilledPolygon,
-                            Ball[i].color,
-                            500
-                        );
-                    }
+                    SRL::Scene2D::Draw(
+                        &polygon[i],
+                        500
+                    );
                     break;
                 }
                 case SrlSpriteDraw:
@@ -478,24 +505,9 @@ int main()
                 }
             }
         }
-        // physics (update after drawing)
-        for (uint16_t i = 0; i < currentBalls; i++) {
-            switch (PauseMovement)
-            {
-                case true:
-                {
-                    break;
-                }
-                default:
-                {
-                    update_ball(&Ball[i]);
-                    break;      
-                }
-            }
-        }
         
-        getInputs(Balls);
-        
+        getInputs(port0, Balls);      
+          
         SRL::Core::Synchronize();
 	}
 
